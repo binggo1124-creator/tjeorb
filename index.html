@@ -1,829 +1,3079 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>부서 직원 근무현황 대시보드</title>
-  <style>
-    :root {
-      /* Kumkang Brand Inspired Colors */
-      --bg: #f4f9fc;
-      --card: #ffffff;
-      --line: #d9e6ef;
-      --text: #1f2933;
-      --muted: #6b7280;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>근무현황 대시보드</title>
 
-      /* Main brand colors extracted from logo */
-      --primary: #1ea7d7;        /* main blue */
-      --primary-dark: #0f7ea8;   /* deeper blue */
-      --primary-light: #d6f1fb;  /* soft sky blue */
-      --accent: #00bcd4;         /* aqua tone */
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3498db">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="근무현황">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-600: #6c757d;
+            --gray-800: #343a40;
+            --white: #ffffff;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --radius: 8px;
+        }
 
-      --danger: #dc2626;
-      --success: #059669;
-      --warning: #d97706;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-      --shadow: 0 10px 25px rgba(30, 167, 215, 0.15);
-      --radius: 14px;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
-    button, input, select, textarea { font: inherit; }
-    .app { min-height: 100vh; display: flex; flex-direction: column; }
-    .topbar {
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      color: white;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .topbar h1 { font-size: 20px; margin: 0; }
-    .topbar .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .layout { display: grid; grid-template-columns: 240px 1fr; gap: 20px; padding: 20px; }
-    .sidebar, .panel, .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
-    .sidebar { padding: 16px; height: fit-content; position: sticky; top: 74px; }
-    .nav-btn { width: 100%; border: 0; background: transparent; padding: 12px 14px; border-radius: 10px; text-align: left; cursor: pointer; color: var(--text); margin-bottom: 6px; }
-    .nav-btn.active, .nav-btn:hover {
-      background: var(--primary-light);
-      color: var(--primary-dark);
-      font-weight: 700;
-    }
-    .content { display: flex; flex-direction: column; gap: 20px; }
-    .panel {
-      border-top: 3px solid var(--primary); padding: 18px; }
-    .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
-    .panel-title { margin: 0; font-size: 18px; }
-    .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
-    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field.full { grid-column: 1 / -1; }
-    label { font-size: 13px; color: var(--muted); font-weight: 700; }
-    input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: white; }
-    textarea { min-height: 100px; resize: vertical; }
-    .btn { border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; background: #e5e7eb; color: var(--text); font-weight: 700; }
-    .btn.primary {
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: white;
-    }
-    .btn.success { background: var(--success); color: white; }
-    .btn.warning { background: var(--warning); color: white; }
-    .btn.danger { background: var(--danger); color: white; }
-    .btn.small { padding: 7px 10px; font-size: 12px; }
-    .auth-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: linear-gradient(135deg, #e0ecff, #f8fbff); }
-    .auth-card { width: 100%; max-width: 950px; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
-    .auth-side { background: #0f172a; color: white; padding: 32px; }
-    .auth-form { background: white; padding: 32px; }
-    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; background: white; }
-    th, td { border: 1px solid var(--line); padding: 10px; text-align: center; vertical-align: top; font-size: 13px; }
-    th { background: #eff6ff; font-weight: 700; }
-    td.cell-clickable { cursor: pointer; }
-    td.cell-clickable:hover { background: #f8fbff; }
-    .task-item, .vacation-item, .issue-item, .handover-item { text-align: left; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; margin-bottom: 8px; }
-    .handover-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .handover-table th, .handover-table td { border: 1px solid var(--line); padding: 8px; font-size: 13px; vertical-align: middle; text-align: left; }
-    .handover-table th { background: #f8fafc; }
-    .handover-check-col { width: 48px; text-align: center !important; }
-    .handover-action-col { width: 130px; text-align: center !important; }
-    .handover-receiver-col { width: 140px; }
-    .handover-content-cell { line-height: 1.5; }
-    .task-meta, .muted { color: var(--muted); font-size: 12px; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-right: 4px; }
-    .badge.progress { background: #fef3c7; color: #92400e; }
-    .badge.done { background: #dcfce7; color: #166534; }
-    .badge.high { background: #ffe5e5; color: #c81e1e; }
-    .badge.mid { background: #fff4cc; color: #b45309; }
-    .badge.low { background: #e0f2fe; color: var(--primary-dark); }
-    .badge.mid { background: #fef3c7; color: #92400e; }
-    .badge.low { background: #dbeafe; color: #1d4ed8; }
-    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-    .calendar-head, .calendar-day { background: white; border: 1px solid var(--line); border-radius: 12px; min-height: 104px; padding: 8px; }
-    .calendar-head {
-      background: linear-gradient(135deg, var(--primary-light), #ffffff); min-height: auto; text-align: center; font-weight: 700; background: #eff6ff; }
-    .calendar-head.sun { color: #dc2626; }
-    .calendar-head.sat { color: #2563eb; }
-    .calendar-day.dim { opacity: 0.4; }
-    .calendar-day-num { font-weight: 700; margin-bottom: 6px; }
-    .calendar-day-num.sun, .holiday-label { color: #dc2626; }
-    .calendar-day-num.sat { color: #2563eb; }
-    .holiday-label { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
-    .vac-chip { font-size: 11px; border-radius: 999px; padding: 2px 6px; margin: 2px 0; display: block; color: white; }
-    .vac-annual { background: #2563eb; }
-    .vac-half { background: #7c3aed; }
-    .vac-halfhalf { background: #0ea5e9; }
-    .vac-event { background: #f97316; }
-    .cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
-    .stat-card {
-      border: 1px solid var(--primary-light);
-      box-shadow: 0 5px 15px rgba(30,167,215,0.1); padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: white; }
-    .stat-card h4 { margin: 0 0 8px; }
-    .stat-big { font-size: 24px; font-weight: 800; }
-    .canvas-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-    canvas { width: 100%; max-width: 360px; background: white; border: 1px solid var(--line); border-radius: 16px; padding: 8px; }
-    .notice { padding: 12px; border-radius: 12px; background: #eff6ff; color: #1d4ed8; margin-bottom: 12px; font-size: 13px; }
-    .approval-list { display: flex; flex-direction: column; gap: 10px; }
-    .readonly-note { color: #991b1b; font-weight: 700; }
-    .screen-only { display: block; }
-    .print-only { display: none; }
-    .print-approval-box { display: none; }
-    .print-approval-title { font-weight: 700; margin-bottom: 8px; }
-    .print-approval-table { width: 100%; border-collapse: collapse; margin: 10px 0 12px; }
-    .print-approval-table td, .print-approval-table th { border: 1px solid #000; height: 42px; }
-    @media (max-width: 1100px) {
-      .layout, .grid-2, .canvas-wrap, .auth-card { grid-template-columns: 1fr; }
-      .sidebar { position: static; }
-      .form-grid { grid-template-columns: 1fr; }
-    }
-    @media print {
-      body { background: white; color: #000; }
-      .topbar, .sidebar, .auth-wrap, .btn, .calendar, canvas, .cards-row, .notice.screen-only { display: none !important; }
-      .layout, .content, .grid-2, .canvas-wrap { display: block !important; padding: 0; margin: 0; }
-      .panel, .handover-item { box-shadow: none; border: 1px solid #000; border-radius: 0; background: white; }
-      .panel { padding: 12px; margin-bottom: 12px; }
-      .print-only, .print-approval-box { display: block !important; }
-      .screen-only { display: none !important; }
-      .handover-item { page-break-inside: avoid; }
-      input[type='checkbox'] { transform: scale(1.1); }
-    }
-  </style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* 유틸리티 클래스 */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-danger { color: var(--danger); }
+        .text-success { color: var(--success); }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+
+        /* 버튼 스타일 */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-secondary {
+            background: var(--gray-600);
+            color: var(--white);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* 폼 스타일 */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            color: var(--gray-600);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        /* 카드 스타일 */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* 로그인 화면 */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .login-box {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: var(--gray-200);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:first-child {
+            border-radius: var(--radius) 0 0 var(--radius);
+        }
+
+        .tab-btn:last-child {
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        /* 헤더 */
+        .header {
+            background: var(--white);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* 네비게이션 */
+        .nav {
+            background: var(--gray-800);
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--gray-300);
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-600);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        /* 메인 컨텐츠 */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* 테이블 스타일 */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        th {
+            background: var(--gray-100);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--gray-100);
+        }
+
+        /* 배지 */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-high { background: #ffebee; color: var(--danger); }
+        .badge-mid { background: #fff3e0; color: var(--warning); }
+        .badge-low { background: #e8f5e9; color: var(--success); }
+        .badge-progress { background: #e3f2fd; color: var(--primary); }
+        .badge-done { background: #e8f5e9; color: var(--success); }
+        .badge-pending { background: #fff3e0; color: var(--warning); }
+        .badge-approved { background: #e8f5e9; color: var(--success); }
+        .badge-rejected { background: #ffebee; color: var(--danger); }
+
+        /* 대시보드 그리드 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .dashboard-full {
+            grid-column: 1 / -1;
+        }
+
+        /* 주간 현황 */
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+
+        .day-column {
+            background: var(--gray-100);
+            border-radius: var(--radius);
+            padding: 0.5rem;
+            min-height: 150px;
+        }
+
+        .day-header {
+            font-weight: 600;
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+        }
+
+        .day-task {
+            background: var(--white);
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        .day-task.high { border-left-color: var(--danger); }
+        .day-task.mid { border-left-color: var(--warning); }
+        .day-task.low { border-left-color: var(--success); }
+
+        /* 캘린더 */
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .calendar-header {
+            background: var(--gray-800);
+            color: var(--white);
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .calendar-day {
+            background: var(--white);
+            padding: 0.5rem;
+            min-height: 80px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .calendar-day.other-month {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .calendar-day.today {
+            background: #e3f2fd;
+        }
+
+        .calendar-date {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .calendar-event {
+            font-size: 0.7rem;
+            padding: 0.125rem 0.25rem;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 2px;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 차트 컨테이너 */
+        .chart-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .chart-wrapper {
+            text-align: center;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        /* 이슈 카드 */
+        .issue-item {
+            padding: 0.75rem;
+            background: #fff3e0;
+            border-left: 4px solid var(--warning);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .issue-item.urgent {
+            background: #ffebee;
+            border-left-color: var(--danger);
+        }
+
+        /* 모달 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        /* 인쇄 스타일 */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 210mm;
+                padding: 20mm;
+            }
+
+            .print-header {
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #000;
+            }
+
+            .print-title {
+                font-size: 24px;
+                font-weight: bold;
+            }
+
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+
+            .print-table th,
+            .print-table td {
+                border: 1px solid #000;
+                padding: 8px;
+            }
+
+            .print-table th {
+                background: #f0f0f0;
+            }
+
+            .signature-area {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 40px;
+            }
+
+            .signature-box {
+                border: 1px solid #000;
+                text-align: center;
+            }
+
+            .signature-box div {
+                padding: 5px 20px;
+                border-bottom: 1px solid #000;
+            }
+
+            .signature-box div:last-child {
+                border-bottom: none;
+                height: 60px;
+            }
+        }
+
+        /* ── 이월 업무 카드 ── */
+        .carry-header {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin-bottom: .75rem;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .carry-sub {
+            font-size: .8rem;
+            color: var(--gray-600);
+            font-weight: 400;
+            background: var(--gray-200);
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+        .carry-empty {
+            color: var(--success);
+            font-size: .9rem;
+            padding: .25rem 0;
+        }
+        .carry-list { font-size: .88rem; }
+        .carry-row {
+            display: grid;
+            grid-template-columns: 90px 1fr 60px 55px;
+            gap: .5rem;
+            align-items: center;
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--gray-200);
+            border-left: 3px solid var(--warning);
+            margin-bottom: 3px;
+            border-radius: 0 4px 4px 0;
+            background: #fffde7;
+        }
+        .carry-row-head {
+            font-weight: 600;
+            background: var(--gray-100);
+            border-left-color: var(--gray-300);
+            color: var(--gray-600);
+            font-size: .8rem;
+        }
+        .carry-date { color: var(--danger); font-weight: 600; }
+
+        /* ── 관리자 전체 직원 업무 테이블 ── */
+        .staff-week-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .83rem;
+        }
+        .staff-week-table th,
+        .staff-week-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px 8px;
+            vertical-align: top;
+            min-width: 100px;
+        }
+        .staff-week-table th {
+            background: var(--primary);
+            color: #fff;
+            text-align: center;
+            font-size: .82rem;
+        }
+        .staff-week-table tbody tr:hover { background: var(--gray-100); }
+        .staff-task-chip {
+            font-size: .75rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            background: #e3f2fd;
+            color: #1565c0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 140px;
+        }
+        .carry-chip {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .high-chip { background: #ffebee; color: #c62828; }
+        .mid-chip  { background: #fff3e0; color: #e65100; }
+        .low-chip  { background: #e8f5e9; color: #2e7d32; }
+
+        /* ── 휴가 달력 (대시보드) ── */
+        .vac-calendar { overflow-x: auto; }
+        .vac-cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            min-width: 560px;
+        }
+        .vac-cal-header {
+            text-align: center;
+            font-weight: 600;
+            font-size: .8rem;
+            padding: .3rem 0;
+            background: var(--gray-200);
+            border-radius: 4px;
+        }
+        .vac-cal-cell {
+            min-height: 70px;
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            padding: 4px;
+            background: var(--white);
+            font-size: .8rem;
+        }
+        .vac-cal-cell.empty { background: transparent; border-color: transparent; }
+        .vac-cal-cell.today { background: #e3f2fd; border-color: var(--primary); }
+        .vac-cal-date { font-weight: 600; margin-bottom: 2px; }
+        .vac-cal-event {
+            color: #fff;
+            border-radius: 3px;
+            padding: 1px 4px;
+            margin-bottom: 2px;
+            font-size: .72rem;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: opacity .15s;
+        }
+        .vac-cal-event:hover { opacity: .8; }
+        .vac-cal-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-top: .75rem;
+            font-size: .82rem;
+        }
+        .vac-cal-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .vac-cal-holiday {
+            font-size: .65rem;
+            color: #e74c3c;
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .holiday-cell {
+            background: #fff5f5 !important;
+        }
+        .today-col { border: 2px solid var(--primary) !important; }
+        .today-header { background: var(--primary-dark) !important; }
+
+        /* 휴가 날짜 링크 */
+        .vac-date-link {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #e3f2fd;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: .85rem;
+            margin: 1px;
+            transition: background .15s;
+        }
+        .vac-date-link:hover { background: var(--primary); color: #fff; }
+
+        /* 인수인계 모달 내용 */
+        .handover-modal-item {
+            padding: .6rem .75rem;
+            border-left: 3px solid var(--primary);
+            background: var(--gray-100);
+            border-radius: 0 4px 4px 0;
+            margin-bottom: .5rem;
+            font-size: .9rem;
+        }
+        .handover-modal-item + .handover-modal-item { margin-top: .5rem; }
+
+        /* ── 알림 스타일 ── */
+        .notif-bell-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius);
+            transition: background 0.2s;
+        }
+        .notif-bell-btn:hover { background: var(--gray-200); }
+
+        .notif-dot {
+            position: absolute;
+            top: 2px; right: 2px;
+            width: 8px; height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            display: none;
+        }
+
+        .notif-panel {
+            position: absolute;
+            top: 70px; right: 1rem;
+            width: 360px;
+            max-width: calc(100vw - 2rem);
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 500;
+            overflow: hidden;
+            animation: notifSlide 0.2s ease;
+        }
+        @keyframes notifSlide {
+            from { opacity:0; transform: translateY(-8px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        .notif-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--gray-800);
+            color: var(--white);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .notif-panel-header button {
+            background: none; border: none;
+            color: var(--white); cursor: pointer;
+            font-size: 1.1rem; line-height: 1;
+        }
+
+        .notif-panel-body {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+
+        .notif-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.88rem;
+        }
+        .notif-row:last-child { border-bottom: none; }
+        .notif-row-icon { font-size: 1.1rem; min-width: 20px; margin-top: 1px; }
+        .notif-row-body { flex: 1; line-height: 1.4; }
+        .notif-row-body small { display: block; color: var(--gray-600); font-size: 0.78rem; margin-top: 2px; }
+
+        .notif-tag {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .ntag-task    { background: #ffebee; color: var(--danger); }
+        .ntag-issue   { background: #fff3e0; color: var(--warning); }
+        .ntag-handover { background: #e8f5e9; color: var(--success); }
+
+        .notif-empty {
+            padding: 1rem;
+            text-align: center;
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+
+        /* 브라우저 알림 권한 토스트 */
+        .notif-toast {
+            position: fixed;
+            bottom: 1.5rem; left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-800);
+            color: var(--white);
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            z-index: 9999;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .week-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-content {
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="app"></div>
-  <script>
-    (() => {
-      'use strict';
+    <!-- 로그인 화면 -->
+    <div id="authScreen" class="login-container">
+        <div class="login-box">
+            <h1 class="login-title">📊 근무현황 대시보드</h1>
+            
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="login">로그인</button>
+                <button class="tab-btn" data-tab="signup">회원가입</button>
+            </div>
 
-      const STORAGE_KEY = 'dept_dashboard_v6_stable_restore_fixed';
-      const WEEK_DAYS = ['월', '화', '수', '목', '금'];
-      const CAL_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
-      const VACATION_CLASS = { '반반차': 'vac-halfhalf', '반차': 'vac-half', '연차': 'vac-annual', '경조사': 'vac-event' };
-      const HOLIDAYS = {
-        '2026-01-01': '신정', '2026-02-16': '설날연휴', '2026-02-17': '설날', '2026-02-18': '설날연휴',
-        '2026-03-01': '삼일절', '2026-05-05': '어린이날', '2026-05-24': '부처님오신날', '2026-06-06': '현충일',
-        '2026-08-15': '광복절', '2026-09-24': '추석연휴', '2026-09-25': '추석', '2026-09-26': '추석연휴',
-        '2026-10-03': '개천절', '2026-10-09': '한글날', '2026-12-25': '성탄절'
-      };
-
-      const Utils = {
-        uuid() { return `${Date.now()}_${Math.random().toString(16).slice(2, 8)}`; },
-        today() { return new Date().toISOString().slice(0, 10); },
-        clone(v) { return JSON.parse(JSON.stringify(v)); },
-        formatDate(dateStr) {
-          const d = new Date(dateStr);
-          if (Number.isNaN(d.getTime())) return dateStr;
-          const day = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()];
-          return `${dateStr} (${day})`;
-        },
-        getWeekStart(baseDate = new Date()) {
-          const d = new Date(baseDate);
-          const day = d.getDay();
-          const diff = day === 0 ? -6 : 1 - day;
-          d.setDate(d.getDate() + diff);
-          d.setHours(0, 0, 0, 0);
-          return d;
-        },
-        addDays(date, days) { const d = new Date(date); d.setDate(d.getDate() + days); return d; },
-        toYmd(date) {
-          const y = date.getFullYear();
-          const m = String(date.getMonth() + 1).padStart(2, '0');
-          const d = String(date.getDate()).padStart(2, '0');
-          return `${y}-${m}-${d}`;
-        },
-        parseMonth(monthStr) {
-          const [y, m] = String(monthStr).split('-').map(Number);
-          return new Date(y, m - 1, 1);
-        },
-        monthKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; },
-        isWithin(date, start, end) { return date >= start && date <= end; },
-        escapeHtml(str = '') {
-          return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        },
-        isFourDigitNumber(text) {
-          return String(text).length === 4 && String(text).split('').every(ch => '0123456789'.includes(ch));
-        },
-        isHoliday(ymd) { return HOLIDAYS[ymd] || ''; },
-        parseYmdLocal(ymd) {
-          const [y, m, d] = String(ymd).split('-').map(Number);
-          return new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0);
-        },
-        sortByDateAsc(a, b) { return String(a).localeCompare(String(b)); }
-      };
-
-      const Store = {
-        state: null,
-        defaultAdmins() {
-          return [{ id: '관리자', password: '1234', empNo: 'A001', worksite: '본사', dept: '관리부', role: 'admin', approved: true, createdAt: new Date().toISOString() }];
-        },
-        defaultState() {
-          return {
-            users: this.defaultAdmins(),
-            session: { userId: null },
-            tasks: [], vacations: [], handovers: [], issues: [],
-            ui: {
-              activeView: 'dashboard', weekOffset: 0, calendarMonth: Utils.monthKey(), analysisMonth: Utils.monthKey(),
-              authMode: 'login', selectedDate: Utils.today(), editingTaskId: null, editingVacationId: null,
-              editingHandoverId: null, taskFilterAssignee: '', taskFilterDate: ''
-            }
-          };
-        },
-        load() {
-          try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            this.state = raw ? JSON.parse(raw) : this.defaultState();
-          } catch (err) {
-            console.error(err);
-            this.state = this.defaultState();
-          }
-          this.ensureAdminAccounts();
-        },
-        ensureAdminAccounts() {
-          this.state.users = (this.state.users || []).filter(u => u.id !== 'admin');
-          this.defaultAdmins().forEach(base => {
-            const found = this.state.users.find(u => u.id === base.id);
-            if (found) {
-              found.role = 'admin';
-              found.approved = true;
-              if (!found.password) found.password = base.password;
-            } else {
-              this.state.users.push(base);
-            }
-          });
-          this.save();
-        },
-        save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); },
-        update(mutator) {
-          const draft = Utils.clone(this.state);
-          mutator(draft);
-          this.state = draft;
-          this.save();
-          App.render();
-        }
-      };
-
-      const Selectors = {
-        currentUser() { return Store.state.users.find(u => u.id === Store.state.session.userId) || null; },
-        approvedUsers() { return Store.state.users.filter(u => u.approved); },
-        pendingUsers() { return Store.state.users.filter(u => !u.approved); },
-        userNameMap() { return Object.fromEntries(Store.state.users.map(u => [u.id, u])); },
-        weekDates() {
-          const start = Utils.getWeekStart(new Date());
-          start.setDate(start.getDate() + Store.state.ui.weekOffset * 7);
-          return WEEK_DAYS.map((_, idx) => Utils.addDays(start, idx));
-        },
-        tasksForWeek() {
-          const dates = this.weekDates().map(Utils.toYmd);
-          return Store.state.tasks.filter(task => dates.includes(task.date));
-        },
-        carriedTasksForWeek() {
-          const weekStart = this.weekDates().map(Utils.toYmd)[0];
-          return Store.state.tasks.filter(task => task.status !== '완료' && task.date < weekStart);
-        },
-        vacationsForMonth(monthKey) {
-          const monthStart = Utils.parseMonth(monthKey);
-          const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0, 23, 59, 59, 999);
-          return Store.state.vacations.filter(v => {
-            const start = Utils.parseYmdLocal(v.startDate);
-            const end = Utils.parseYmdLocal(v.endDate || v.startDate);
-            return !(end < monthStart || start > monthEnd);
-          });
-        },
-        handoversByDate() {
-          return Store.state.handovers.reduce((acc, item) => {
-            if (!acc[item.date]) acc[item.date] = [];
-            acc[item.date].push(item);
-            return acc;
-          }, {});
-        },
-        completedTasksByMonth(monthKey) {
-          return Store.state.tasks.filter(task => task.status === '완료' && task.date.startsWith(monthKey));
-        }
-      };
-
-      const Permissions = {
-        canEditTask(task, current) { return !!task && !!current && (current.role === 'admin' || task.authorId === current.id || task.assigneeId === current.id); },
-        canDeleteTask(task, current) { return !!task && !!current && (current.role === 'admin' || task.authorId === current.id); },
-        canEditVacation(v, c) { return !!v && !!c && (c.role === 'admin' || v.userId === c.id); },
-        canDeleteVacation(v, c) { return !!v && !!c && (c.role === 'admin' || v.userId === c.id); },
-        canEditHandover(h, c) { return !!h && !!c && (c.role === 'admin' || h.userId === c.id); },
-        canDeleteHandover(h, c) { return !!h && !!c && (c.role === 'admin' || h.userId === c.id); }
-      };
-
-      const Actions = {
-        login(form) {
-          const user = Store.state.users.find(u => u.id === form.id);
-          if (!user) return alert('존재하지 않는 아이디입니다.');
-          if (user.password !== form.password) return alert('비밀번호가 틀립니다.');
-          if (!user.approved) return alert('관리자 승인 후 로그인 가능합니다.');
-          Store.update(s => { s.session.userId = user.id; });
-        },
-        signup(form) {
-          if (!Utils.isFourDigitNumber(form.password)) return alert('비밀번호는 4자리 숫자여야 합니다.');
-          if (Store.state.users.some(u => u.id === form.id)) return alert('이미 존재하는 이름(ID)입니다.');
-          Store.update(s => {
-            s.users.push({ id: form.id, password: form.password, empNo: form.empNo, worksite: form.worksite, dept: form.dept, role: 'staff', approved: false, createdAt: new Date().toISOString() });
-            s.ui.authMode = 'login';
-          });
-          alert('회원가입 완료. 관리자 승인 후 로그인 가능합니다.');
-        },
-        logout() { Store.update(s => { s.session.userId = null; }); },
-        approveUser(userId) { Store.update(s => { const u = s.users.find(x => x.id === userId); if (u) u.approved = true; }); },
-        setView(view) { Store.update(s => { s.ui.activeView = view; }); },
-        changeWeek(delta) { Store.update(s => { s.ui.weekOffset += delta; }); },
-        changeCalendarMonth(delta) {
-          Store.update(s => {
-            const base = Utils.parseMonth(s.ui.calendarMonth);
-            base.setMonth(base.getMonth() + delta);
-            s.ui.calendarMonth = Utils.monthKey(base);
-          });
-        },
-        changeAnalysisMonth(monthKey) { Store.update(s => { s.ui.analysisMonth = monthKey; }); },
-        setSelectedDate(date, view) { Store.update(s => { s.ui.selectedDate = date; s.ui.activeView = view; }); },
-        openTaskForm(date, taskId = null) { Store.update(s => { s.ui.selectedDate = date; s.ui.editingTaskId = taskId; s.ui.activeView = 'taskForm'; }); },
-        editTask(id) {
-          const task = Store.state.tasks.find(t => t.id === id);
-          const current = Selectors.currentUser();
-          if (!Permissions.canEditTask(task, current)) return alert('수정 권한이 없습니다.');
-          this.openTaskForm(task.date, id);
-        },
-        deleteTask(id) {
-          const task = Store.state.tasks.find(t => t.id === id);
-          const current = Selectors.currentUser();
-          if (!Permissions.canDeleteTask(task, current)) return alert('삭제 권한이 없습니다.');
-          if (!confirm('업무를 삭제하시겠습니까?')) return;
-          Store.update(s => {
-            s.tasks = s.tasks.filter(t => t.id !== id);
-            if (s.ui.editingTaskId === id) s.ui.editingTaskId = null;
-            s.ui.activeView = 'dashboard';
-          });
-        },
-        saveTask(form) {
-          const current = Selectors.currentUser();
-          if (!current) return;
-          Store.update(s => {
-            const isEdit = !!s.ui.editingTaskId;
-            const existing = isEdit ? s.tasks.find(t => t.id === s.ui.editingTaskId) : null;
-            if (isEdit && !Permissions.canEditTask(existing, current)) { alert('수정 권한이 없습니다.'); return; }
-            const assigneeId = current.role === 'admin' ? form.assigneeId : current.id;
-            const payload = { id: isEdit ? s.ui.editingTaskId : Utils.uuid(), date: form.date, content: form.content, status: form.status, priority: form.priority, hours: Number(form.hours || 0), assigneeId, authorId: existing ? existing.authorId : current.id, createdAt: existing ? existing.createdAt : new Date().toISOString(), updatedAt: new Date().toISOString() };
-            if (isEdit) {
-              const idx = s.tasks.findIndex(t => t.id === s.ui.editingTaskId);
-              if (idx > -1) s.tasks[idx] = { ...s.tasks[idx], ...payload };
-            } else {
-              s.tasks.push(payload);
-            }
-            s.ui.editingTaskId = null;
-            s.ui.activeView = 'dashboard';
-          });
-        },
-        editVacation(id) {
-          const vacation = Store.state.vacations.find(v => v.id === id);
-          const current = Selectors.currentUser();
-          if (!Permissions.canEditVacation(vacation, current)) return alert('수정 권한이 없습니다.');
-          Store.update(s => { s.ui.editingVacationId = id; s.ui.activeView = 'vacation'; });
-        },
-        deleteVacation(id) {
-          const vacation = Store.state.vacations.find(v => v.id === id);
-          const current = Selectors.currentUser();
-          if (!Permissions.canDeleteVacation(vacation, current)) return alert('삭제 권한이 없습니다.');
-          if (!confirm('휴가계획을 삭제하시겠습니까?')) return;
-          Store.update(s => {
-            s.vacations = s.vacations.filter(v => v.id !== id);
-            if (s.ui.editingVacationId === id) s.ui.editingVacationId = null;
-          });
-        },
-        saveVacation(form) {
-          const current = Selectors.currentUser();
-          if (!current) return;
-          const requiresRange = form.type === '연차' || form.type === '경조사';
-          const endDate = requiresRange ? (form.endDate || form.startDate) : form.startDate;
-          if (endDate < form.startDate) return alert('종료일은 시작일보다 빠를 수 없습니다.');
-          Store.update(s => {
-            const isEdit = !!s.ui.editingVacationId;
-            const existing = isEdit ? s.vacations.find(v => v.id === s.ui.editingVacationId) : null;
-            if (isEdit && !Permissions.canEditVacation(existing, current)) { alert('수정 권한이 없습니다.'); return; }
-            const payload = { id: isEdit ? s.ui.editingVacationId : Utils.uuid(), userId: existing ? existing.userId : current.id, type: form.type, reason: form.reason, startDate: form.startDate, endDate, createdAt: existing ? existing.createdAt : new Date().toISOString(), updatedAt: new Date().toISOString() };
-            if (isEdit) {
-              const idx = s.vacations.findIndex(v => v.id === s.ui.editingVacationId);
-              if (idx > -1) s.vacations[idx] = { ...s.vacations[idx], ...payload };
-            } else {
-              s.vacations.push(payload);
-            }
-            s.ui.editingVacationId = null;
-          });
-        },
-        editHandover(id) {
-          const handover = Store.state.handovers.find(h => h.id === id);
-          const current = Selectors.currentUser();
-          if (!Permissions.canEditHandover(handover, current)) return alert('수정 권한이 없습니다.');
-          Store.update(s => { s.ui.editingHandoverId = id; s.ui.selectedDate = handover.date; s.ui.activeView = 'handover'; });
-        },
-        deleteHandover(id) {
-          const handover = Store.state.handovers.find(h => h.id === id);
-          const current = Selectors.currentUser();
-          if (!Permissions.canDeleteHandover(handover, current)) return alert('삭제 권한이 없습니다.');
-          if (!confirm('인수인계사항을 삭제하시겠습니까?')) return;
-          Store.update(s => {
-            s.handovers = s.handovers.filter(h => h.id !== id);
-            if (s.ui.editingHandoverId === id) s.ui.editingHandoverId = null;
-          });
-        },
-        saveHandover(form) {
-          const current = Selectors.currentUser();
-          if (!current) return;
-          Store.update(s => {
-            const isEdit = !!s.ui.editingHandoverId;
-            const existing = isEdit ? s.handovers.find(h => h.id === s.ui.editingHandoverId) : null;
-            if (isEdit && !Permissions.canEditHandover(existing, current)) { alert('수정 권한이 없습니다.'); return; }
-            const payload = { id: isEdit ? s.ui.editingHandoverId : Utils.uuid(), userId: existing ? existing.userId : current.id, receiverName: form.receiverName, date: form.date, content: form.content, createdAt: existing ? existing.createdAt : new Date().toISOString(), updatedAt: new Date().toISOString() };
-            if (isEdit) {
-              const idx = s.handovers.findIndex(h => h.id === s.ui.editingHandoverId);
-              if (idx > -1) s.handovers[idx] = { ...s.handovers[idx], ...payload };
-            } else {
-              s.handovers.push(payload);
-            }
-            s.ui.selectedDate = form.date;
-            s.ui.editingHandoverId = null;
-          });
-        },
-        saveIssue(form) {
-          const current = Selectors.currentUser();
-          if (!current || current.role !== 'admin') return;
-          Store.update(s => { s.issues.push({ id: Utils.uuid(), title: form.title, content: form.content, createdAt: new Date().toISOString(), authorId: current.id }); });
-        },
-        deleteIssue(id) {
-          const current = Selectors.currentUser();
-          if (!current || current.role !== 'admin') return;
-          if (!confirm('이슈사항을 삭제하시겠습니까?')) return;
-          Store.update(s => { s.issues = s.issues.filter(i => i.id !== id); });
-        },
-        exportAnalysisExcel(userId) {
-          const current = Selectors.currentUser();
-          if (!current || current.role !== 'admin') return;
-          const month = Store.state.ui.analysisMonth;
-          const rows = Selectors.completedTasksByMonth(month)
-            .filter(task => task.assigneeId === userId)
-            .sort((a, b) => String(a.date).localeCompare(String(b.date)))
-            .map(task => [task.date, task.content, task.priority, String(task.hours)]);
-          const header = ['날짜', '업무내용', '중요도', '소요시간'];
-          const escapeCell = (value) => {
-            const text = String(value ?? '');
-            if (/[",\n]/.test(text)) return '"' + text.replace(/"/g, '""') + '"';
-            return text;
-          };
-          const csv = '\ufeff' + [header.map(escapeCell).join(','), ...rows.map(row => row.map(escapeCell).join(','))].join('\n');
-          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${userId}_업무분석_${month}.csv`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-        }
-      };
-
-      const App = {
-        init() { Store.load(); this.bindEvents(); this.render(); },
-        bindEvents() {
-          document.addEventListener('click', (e) => {
-            const btn = e.target.closest('[data-action]');
-            if (!btn) return;
-            const action = btn.dataset.action;
-            const value = btn.dataset.value;
-            if (action === 'switch-auth') Store.update(s => { s.ui.authMode = value; });
-            if (action === 'logout') Actions.logout();
-            if (action === 'nav') Actions.setView(value);
-            if (action === 'week-prev') Actions.changeWeek(-1);
-            if (action === 'week-next') Actions.changeWeek(1);
-            if (action === 'month-prev') Actions.changeCalendarMonth(-1);
-            if (action === 'month-next') Actions.changeCalendarMonth(1);
-            if (action === 'open-task-date') Actions.openTaskForm(value);
-            if (action === 'open-task-edit') Actions.editTask(value);
-            if (action === 'delete-task') Actions.deleteTask(value);
-            if (action === 'reset-task-filters') Store.update(s => { s.ui.taskFilterAssignee = ''; s.ui.taskFilterDate = ''; });
-            if (action === 'edit-vacation') Actions.editVacation(value);
-            if (action === 'delete-vacation') Actions.deleteVacation(value);
-            if (action === 'edit-handover') Actions.editHandover(value);
-            if (action === 'delete-handover') Actions.deleteHandover(value);
-            if (action === 'approve-user') Actions.approveUser(value);
-            if (action === 'delete-issue') Actions.deleteIssue(value);
-            if (action === 'export-analysis-excel') Actions.exportAnalysisExcel(value);
-            if (action === 'open-handover-date') Actions.setSelectedDate(value, 'handover');
-            if (action === 'show-all-handover') Store.update(s => { s.ui.selectedDate = ''; s.ui.activeView = 'handover'; });
-            if (action === 'print-handover') window.print();
-          });
-          document.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const fd = Object.fromEntries(new FormData(form).entries());
-            if (form.dataset.form === 'login') Actions.login(fd);
-            if (form.dataset.form === 'signup') Actions.signup(fd);
-            if (form.dataset.form === 'task') Actions.saveTask(fd);
-            if (form.dataset.form === 'vacation') Actions.saveVacation(fd);
-            if (form.dataset.form === 'handover') Actions.saveHandover(fd);
-            if (form.dataset.form === 'issue') Actions.saveIssue(fd);
-          });
-          document.addEventListener('change', (e) => {
-            const el = e.target;
-            if (el.matches('[data-role="analysis-month"]')) Actions.changeAnalysisMonth(el.value);
-            if (el.matches('[data-role="task-filter-assignee"]')) Store.update(s => { s.ui.taskFilterAssignee = el.value; });
-            if (el.matches('[data-role="task-filter-date"]')) Store.update(s => { s.ui.taskFilterDate = el.value; });
-            if (el.matches('[data-role="vacation-type"]')) {
-              const wrap = document.querySelector('[data-role="vacation-end-field"]');
-              const endInput = wrap ? wrap.querySelector('input[name="endDate"]') : null;
-              const allowRange = el.value === '연차' || el.value === '경조사';
-              if (wrap) wrap.style.display = allowRange ? 'flex' : 'none';
-              if (endInput && !allowRange) endInput.value = '';
-            }
-          });
-        },
-        render() {
-          const root = document.getElementById('app');
-          const user = Selectors.currentUser();
-          root.innerHTML = user ? this.renderMain(user) : this.renderAuth();
-          if (user && Store.state.ui.activeView === 'analysis') setTimeout(() => Charts.renderAnalysisCharts(), 0);
-        },
-        renderAuth() {
-          const mode = Store.state.ui.authMode;
-          return `
-            <div class="auth-wrap">
-              <div class="auth-card card">
-                <div class="auth-side">
-                  <h2>부서 직원 근무현황 대시보드</h2>
-                  <p>단일 파일 구조이지만 기능별 모듈처럼 분리했습니다.</p>
-                  <ul>
-                    <li>로그인 / 회원가입 / 승인</li>
-                    <li>주간업무 / 휴가 / 인수인계 / 이슈 / 분석</li>
-                    <li>localStorage 저장</li>
-                    <li>관리자 / 직원 권한 분리</li>
-                  </ul>
+            <!-- 로그인 폼 -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginName">이름 (ID)</label>
+                    <input type="text" id="loginName" class="form-control" required>
                 </div>
-                <div class="auth-form">
-                  <div class="panel-header">
-                    <h3 class="panel-title">${mode === 'login' ? '로그인' : '회원가입'}</h3>
-                    <div>
-                      <button class="btn small ${mode === 'login' ? 'primary' : ''}" data-action="switch-auth" data-value="login">로그인</button>
-                      <button class="btn small ${mode === 'signup' ? 'primary' : ''}" data-action="switch-auth" data-value="signup">회원가입</button>
+                <div class="form-group">
+                    <label for="loginPw">비밀번호 (4자리 숫자)</label>
+                    <input type="password" id="loginPw" class="form-control" maxlength="4" pattern="\d{4}" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%">로그인</button>
+                <p id="loginError" class="text-danger text-center mt-1 hidden"></p>
+            </form>
+
+            <!-- 회원가입 폼 -->
+            <form id="signupForm" class="hidden">
+                <div class="form-group">
+                    <label for="signupName">이름</label>
+                    <input type="text" id="signupName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmpNo">사번</label>
+                    <input type="text" id="signupEmpNo" class="form-control" required placeholder="사번을 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label for="signupWorksite">근무지</label>
+                    <input type="text" id="signupWorksite" class="form-control" required placeholder="근무지를 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label for="signupDept">부서</label>
+                    <input type="text" id="signupDept" class="form-control" required placeholder="부서를 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label for="signupPw">비밀번호 (4자리 숫자)</label>
+                    <input type="password" id="signupPw" class="form-control" maxlength="4" pattern="\d{4}" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPwConfirm">비밀번호 확인</label>
+                    <input type="password" id="signupPwConfirm" class="form-control" maxlength="4" pattern="\d{4}" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width:100%">가입 신청</button>
+                <p id="signupError" class="text-danger text-center mt-1 hidden"></p>
+                <p id="signupSuccess" class="text-success text-center mt-1 hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 메인 앱 -->
+    <div id="appScreen" class="hidden">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="header-title">📊 근무현황 대시보드</h1>
+                <div class="header-user">
+                    <span id="userInfo"></span>
+                    <!-- 앱 설치 버튼 (PWA) -->
+                    <button id="pwaInstallBtn" class="btn btn-primary btn-sm hidden" title="앱으로 설치">📲 앱 설치</button>
+                    <!-- 알림 벨 -->
+                    <button class="notif-bell-btn" id="notifBellBtn" title="알림">
+                        🔔<span class="notif-dot" id="notifDot"></span>
+                    </button>
+                    <!-- 알림 패널 -->
+                    <div class="notif-panel hidden" id="notifPanel">
+                        <div class="notif-panel-header">
+                            <span>🔔 알림</span>
+                            <button onclick="Notif.closePanel()">✕</button>
+                        </div>
+                        <div class="notif-panel-body" id="notifPanelBody"></div>
                     </div>
-                  </div>
-                  ${mode === 'login' ? this.renderLoginForm() : this.renderSignupForm()}
+                    <button id="changePwBtn" class="btn btn-secondary btn-sm">비밀번호 변경</button>
+                    <button id="logoutBtn" class="btn btn-danger btn-sm">로그아웃</button>
                 </div>
-              </div>
-            </div>`;
-        },
-        renderLoginForm() {
-          return `<form data-form="login" class="form-grid">
-              <div class="field full"><label>이름(ID)</label><input name="id" required /></div>
-              <div class="field full"><label>비밀번호(4자리 숫자)</label><input name="password" type="password" inputmode="numeric" maxlength="4" required autocomplete="current-password" /></div>
-              <div class="field full"><button class="btn primary" type="submit">로그인</button></div>
-            </form>`;
-        },
-        renderSignupForm() {
-          return `<form data-form="signup" class="form-grid">
-              <div class="field"><label>이름(ID)</label><input name="id" required /></div>
-              <div class="field"><label>비밀번호(4자리 숫자)</label><input name="password" type="password" inputmode="numeric" maxlength="4" required autocomplete="new-password" /></div>
-              <div class="field"><label>사번</label><input name="empNo" required /></div>
-              <div class="field"><label>근무지</label><input name="worksite" required /></div>
-              <div class="field full"><label>부서</label><input name="dept" required /></div>
-              <div class="field full"><button class="btn primary" type="submit">회원가입 요청</button></div>
-            </form>`;
-        },
-        renderMain(user) {
-          const view = Store.state.ui.activeView;
-          return `<div class="app">
-              <div class="topbar">
-                <h1>부서 직원 근무현황 대시보드</h1>
-                <div class="right"><span>${Utils.escapeHtml(user.id)} / ${user.role === 'admin' ? '관리자' : '직원'}</span><button class="btn" data-action="logout">로그아웃</button></div>
-              </div>
-              <div class="layout">
-                <aside class="sidebar">${this.renderNav(user, view)}</aside>
-                <main class="content">
-                  ${user.role === 'admin' && Selectors.pendingUsers().length ? this.renderApprovalPanel() : ''}
-                  ${this.renderView(view, user)}
-                </main>
-              </div>
-            </div>`;
-        },
-        renderNav(user, activeView) {
-          const items = [['dashboard', '메인 화면'], ['taskForm', '업무작성'], ['vacation', '휴가계획'], ['handover', '인수인계']];
-          if (user.role === 'admin') items.push(['issues', '이슈사항']);
-          if (user.role === 'admin') items.push(['analysis', '업무분석']);
-          return items.map(([key, label]) => `<button class="nav-btn ${activeView === key ? 'active' : ''}" data-action="nav" data-value="${key}">${label}</button>`).join('');
-        },
-        renderApprovalPanel() {
-          return `<section class="panel"><div class="panel-header"><h3 class="panel-title">가입 승인 대기</h3></div><div class="approval-list">${Selectors.pendingUsers().map(user => `<div class="task-item"><div><strong>${Utils.escapeHtml(user.id)}</strong> / ${Utils.escapeHtml(user.empNo)} / ${Utils.escapeHtml(user.worksite)} / ${Utils.escapeHtml(user.dept)}</div><div class="task-meta">가입일: ${new Date(user.createdAt).toLocaleString('ko-KR')}</div><div style="margin-top:8px;"><button class="btn success small" data-action="approve-user" data-value="${user.id}">승인</button></div></div>`).join('')}</div></section>`;
-        },
-        renderView(view, user) {
-          if (view === 'dashboard') return this.renderDashboard(user);
-          if (view === 'taskForm') return this.renderTaskForm(user);
-          if (view === 'vacation') return this.renderVacationView(user);
-          if (view === 'handover') return this.renderHandoverView(user);
-          if (view === 'issues') return this.renderIssueView(user);
-          if (view === 'analysis') return this.renderAnalysisView();
-          return this.renderDashboard(user);
-        },
-        renderDashboard(user) {
-          return `<div class="grid-2"><section class="panel">${this.renderWeeklyTasks(user)}</section><section class="panel">${this.renderIssueSummary(user)}</section><section class="panel">${this.renderVacationCalendar()}</section><section class="panel">${this.renderCarryOverTasks(user)}</section></div>`;
-        },
-        renderWeeklyTasks(user) {
-          const dates = Selectors.weekDates();
-          const tasks = Selectors.tasksForWeek();
-          const visibleUsers = user.role === 'admin' ? Selectors.approvedUsers() : Selectors.approvedUsers().filter(u => u.id === user.id);
-          const rows = visibleUsers.map(member => {
-            const cols = dates.map(dateObj => {
-              const date = Utils.toYmd(dateObj);
-              const items = tasks.filter(t => t.assigneeId === member.id && t.date === date);
-              const content = items.length ? items.map(item => `<div class="task-item"><div>${Utils.escapeHtml(item.content)}</div><div class="task-meta"><span class="badge ${item.status === '완료' ? 'done' : 'progress'}">${item.status}</span><span class="badge ${item.priority === '상' ? 'high' : item.priority === '중' ? 'mid' : 'low'}">${item.priority}</span>${item.hours}시간</div></div>`).join('') : '<div class="muted">업무 없음</div>';
-              return `<td class="cell-clickable" data-action="open-task-date" data-value="${date}">${content}</td>`;
-            }).join('');
-            return `<tr><th>${Utils.escapeHtml(member.id)}</th>${cols}</tr>`;
-          }).join('');
-          return `<div class="panel-header"><h3 class="panel-title">금주 업무현황</h3><div><button class="btn small" data-action="week-prev">◀ 전주</button><button class="btn small" data-action="week-next">다음주 ▶</button></div></div><div class="notice"><div class="readonly-note">메인 화면은 완전 읽기 전용입니다.</div>셀 클릭 시 업무작성 화면으로 이동하며, 메인 화면에서는 수정/삭제 버튼을 노출하지 않습니다.</div><table><thead><tr><th>담당자</th>${dates.map((d, i) => `<th>${Utils.toYmd(d)}<br>${WEEK_DAYS[i]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
-        },
-        renderCarryOverTasks(user) {
-          const nameMap = Selectors.userNameMap();
-          const items = Selectors.carriedTasksForWeek().filter(t => user.role === 'admin' || t.assigneeId === user.id);
-          return `<div class="panel-header"><h3 class="panel-title">이월업무</h3></div>${items.length ? items.map(item => `<div class="task-item"><div><strong>${Utils.escapeHtml(nameMap[item.assigneeId]?.id || item.assigneeId)}</strong> - ${Utils.escapeHtml(item.content)}</div><div class="task-meta">원래 날짜: ${Utils.formatDate(item.date)} / 상태: ${item.status}</div></div>`).join('') : '<div class="muted">이월업무가 없습니다.</div>'}`;
-        },
-        renderVacationCalendar() {
-          const monthKey = Store.state.ui.calendarMonth;
-          const currentMonth = Utils.parseMonth(monthKey);
-          const year = currentMonth.getFullYear();
-          const month = currentMonth.getMonth();
-          const firstDay = new Date(year, month, 1);
-          const lastDay = new Date(year, month + 1, 0);
-          const startPad = firstDay.getDay();
-          const days = [];
-          const vacations = Selectors.vacationsForMonth(monthKey);
-          const nameMap = Selectors.userNameMap();
-          for (let i = 0; i < startPad; i++) days.push(null);
-          for (let d = 1; d <= lastDay.getDate(); d++) days.push(new Date(year, month, d));
-          while (days.length % 7 !== 0) days.push(null);
-          return `<div class="panel-header"><h3 class="panel-title">휴가 달력</h3><div><button class="btn small" data-action="month-prev">◀</button><strong>${monthKey}</strong><button class="btn small" data-action="month-next">▶</button></div></div><div class="calendar">${CAL_DAYS.map((day, idx) => `<div class="calendar-head ${idx === 0 ? 'sun' : idx === 6 ? 'sat' : ''}">${day}</div>`).join('')}${days.map(day => {
-            if (!day) return '<div class="calendar-day dim"></div>';
-            const ymd = Utils.toYmd(day);
-            const dayVac = vacations.filter(v => {
-              const start = Utils.parseYmdLocal(v.startDate);
-              const end = Utils.parseYmdLocal(v.endDate || v.startDate);
-              return Utils.isWithin(day, start, end);
+            </div>
+        </header>
+
+        <nav class="nav">
+            <div class="nav-content">
+                <button class="nav-btn active" data-page="dashboard">대시보드</button>
+                <button class="nav-btn" data-page="tasks">업무 관리</button>
+                <button class="nav-btn" data-page="vacation">휴가 계획</button>
+                <button class="nav-btn" data-page="handover">인수인계</button>
+                <button class="nav-btn admin-only" data-page="issues">이슈 관리</button>
+                <button class="nav-btn admin-only" data-page="analysis">업무 분석</button>
+                <button class="nav-btn admin-only" data-page="members">회원 관리</button>
+            </div>
+        </nav>
+
+        <main class="main" id="mainContent"></main>
+    </div>
+
+    <!-- 인쇄 영역 -->
+    <div id="printArea" class="print-area hidden"></div>
+
+    <!-- 알림 권한 토스트 -->
+    <div class="notif-toast" id="notifToast"></div>
+
+    <script>
+        // ==================== 🔔 알림 모듈 ====================
+        const Notif = {
+            /** 브라우저 푸시 권한 요청 */
+            async requestPermission() {
+                if (!('Notification' in window)) return false;
+                if (Notification.permission === 'granted') return true;
+                if (Notification.permission === 'denied') return false;
+                const result = await Notification.requestPermission();
+                return result === 'granted';
+            },
+
+            /** 브라우저 푸시 발송 */
+            push(title, body) {
+                if (!('Notification' in window) || Notification.permission !== 'granted') return;
+                try { new Notification(title, { body }); } catch(e) {}
+            },
+
+            /** 토스트 표시 */
+            toast(msg, ms = 3000) {
+                const el = document.getElementById('notifToast');
+                if (!el) return;
+                el.textContent = msg;
+                el.style.display = 'block';
+                setTimeout(() => { el.style.display = 'none'; }, ms);
+            },
+
+            /** 알림 항목 수집 */
+            collect() {
+                const data = DataStore.getData();
+                const today = Utils.today();
+                const user = Auth.currentUser;
+                if (!user) return [];
+                const isAdmin = Auth.isAdmin();
+                const items = [];
+
+                // 1) 미완료 업무: 오늘 이전 날짜의 progress 상태
+                data.tasks
+                    .filter(t => {
+                        if (!isAdmin && t.assignee !== user.name && t.createdBy !== user.name) return false;
+                        return t.status === 'progress' && t.date < today;
+                    })
+                    .forEach(t => items.push({
+                        type: 'task',
+                        icon: '⚠️',
+                        tag: '미완료 업무',
+                        tagClass: 'ntag-task',
+                        title: `${t.assignee || t.createdBy} — ${t.content.substring(0, 30)}${t.content.length > 30 ? '…' : ''}`,
+                        detail: `예정일: ${t.date} / 중요도: ${t.priority}`
+                    }));
+
+                // 2) 활성 이슈 전체
+                data.issues
+                    .filter(i => i.active)
+                    .forEach(i => items.push({
+                        type: 'issue',
+                        icon: '🚨',
+                        tag: i.urgent ? '긴급 이슈' : '이슈',
+                        tagClass: 'ntag-issue',
+                        title: i.title,
+                        detail: i.content.substring(0, 40)
+                    }));
+
+                // 3) 인수인계 오늘~3일 이내
+                data.handovers
+                    .filter(h => {
+                        if (!isAdmin && h.from !== user.name) return false;
+                        const diff = Math.ceil((new Date(h.date) - new Date(today)) / 86400000);
+                        return diff >= 0 && diff <= 3;
+                    })
+                    .forEach(h => {
+                        const diff = Math.ceil((new Date(h.date) - new Date(today)) / 86400000);
+                        const label = diff === 0 ? '오늘' : `D-${diff}`;
+                        items.push({
+                            type: 'handover',
+                            icon: '📋',
+                            tag: `인수인계 ${label}`,
+                            tagClass: 'ntag-handover',
+                            title: `${h.from} → ${h.to}`,
+                            detail: `${h.date} / ${h.content.substring(0, 30)}`
+                        });
+                    });
+
+                return items;
+            },
+
+            /** 패널 HTML 렌더 */
+            renderPanel() {
+                const items = this.collect();
+                const body = document.getElementById('notifPanelBody');
+                if (!body) return;
+                if (items.length === 0) {
+                    body.innerHTML = '<div class="notif-empty">현재 알림이 없습니다. 👍</div>';
+                    return;
+                }
+                body.innerHTML = items.map(it => `
+                    <div class="notif-row">
+                        <span class="notif-row-icon">${it.icon}</span>
+                        <span class="notif-row-body">
+                            <span class="notif-tag ${it.tagClass}">${it.tag}</span>${Utils.escapeHtml(it.title)}
+                            <small>${Utils.escapeHtml(it.detail)}</small>
+                        </span>
+                    </div>
+                `).join('');
+            },
+
+            /** 벨 빨간 점 갱신 */
+            updateDot() {
+                const items = this.collect();
+                const dot = document.getElementById('notifDot');
+                if (dot) dot.style.display = items.length > 0 ? 'block' : 'none';
+            },
+
+            /** 패널 열기/닫기 토글 */
+            togglePanel() {
+                const panel = document.getElementById('notifPanel');
+                if (!panel) return;
+                const isHidden = panel.classList.contains('hidden');
+                if (isHidden) {
+                    this.renderPanel();
+                    panel.classList.remove('hidden');
+                } else {
+                    panel.classList.add('hidden');
+                }
+            },
+
+            /** 패널 닫기 */
+            closePanel() {
+                const panel = document.getElementById('notifPanel');
+                if (panel) panel.classList.add('hidden');
+            },
+
+            /** 로그인/데이터 변경 시 실행 (triggerPush=true면 푸시 발송) */
+            async run(triggerPush = false) {
+                if (!Auth.currentUser) return;
+                this.updateDot();
+
+                if (!triggerPush) return;
+
+                const granted = await this.requestPermission();
+                if (!granted) {
+                    this.toast('브라우저 알림 권한을 허용하면 푸시 알림을 받을 수 있습니다.');
+                    return;
+                }
+
+                const items = this.collect();
+                const groups = {};
+                items.forEach(it => { (groups[it.type] = groups[it.type] || []).push(it); });
+
+                if (groups.task?.length)
+                    this.push(`⚠️ 미완료 업무 ${groups.task.length}건`, groups.task.map(i => i.title).join('\n'));
+                if (groups.issue?.length)
+                    this.push(`🚨 이슈 ${groups.issue.length}건`, groups.issue.map(i => i.title).join('\n'));
+                if (groups.handover?.length)
+                    this.push(`📋 인수인계 일정 ${groups.handover.length}건`, groups.handover.map(i => `${i.tag}: ${i.title}`).join('\n'));
+            }
+        };
+
+        // ==================== 유틸리티 ====================
+        const Utils = {
+            // XSS 방지
+            escapeHtml(text) {
+                if (text === null || text === undefined) return '';
+                const div = document.createElement('div');
+                div.textContent = String(text);
+                return div.innerHTML;
+            },
+
+            // 날짜 포맷
+            formatDate(date) {
+                if (!date) return '';
+                const d = new Date(date);
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            },
+
+            // 오늘 날짜
+            today() {
+                return this.formatDate(new Date());
+            },
+
+            // 주의 시작일 (월요일)
+            getWeekStart(date = new Date()) {
+                const d = new Date(date);
+                const day = d.getDay();
+                const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+                d.setDate(diff);
+                return d;
+            },
+
+            // 날짜 범위 생성
+            getDateRange(start, end) {
+                const dates = [];
+                const current = new Date(start);
+                const endDate = new Date(end);
+                while (current <= endDate) {
+                    dates.push(this.formatDate(current));
+                    current.setDate(current.getDate() + 1);
+                }
+                return dates;
+            },
+
+            // 요일 이름
+            getDayName(date) {
+                const days = ['일', '월', '화', '수', '목', '금', '토'];
+                return days[new Date(date).getDay()];
+            },
+
+            // 비밀번호 해시 (간단한 버전 - 실제로는 bcrypt 등 사용)
+            hashPassword(pw) {
+                let hash = 0;
+                for (let i = 0; i < pw.length; i++) {
+                    const char = pw.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return 'h' + Math.abs(hash).toString(16);
+            },
+
+            // ID 생성
+            generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            },
+
+            // 검증
+            validatePin(pin) {
+                return /^\d{4}$/.test(pin);
+            },
+
+            validateName(name) {
+                return name && name.trim().length >= 2;
+            },
+
+            // 한국 공휴일 반환 (고정 공휴일 + 주요 음력 공휴일 근사값)
+            getKoreanHolidays(year) {
+                const h = {};
+                const add = (mm, dd, name) => {
+                    h[`${year}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`] = name;
+                };
+                // 고정 공휴일
+                add(1,1,'신정');
+                add(3,1,'삼일절');
+                add(5,5,'어린이날');
+                add(6,6,'현충일');
+                add(8,15,'광복절');
+                add(10,3,'개천절');
+                add(10,9,'한글날');
+                add(12,25,'성탄절');
+
+                // 음력 기반 공휴일 (근사 계산 - 실용적 수준)
+                const lunarHolidays = {
+                    2024: { seollal: [[2,9],[2,10],[2,12]], chuseok: [[9,16],[9,17],[9,18]] },
+                    2025: { seollal: [[1,28],[1,29],[1,30]], chuseok: [[10,5],[10,6],[10,7]] },
+                    2026: { seollal: [[2,17],[2,18],[2,19]], chuseok: [[9,24],[9,25],[9,26]] },
+                    2027: { seollal: [[2,6],[2,7],[2,8]], chuseok: [[9,14],[9,15],[9,16]] },
+                    2028: { seollal: [[1,26],[1,27],[1,28]], chuseok: [[10,2],[10,3],[10,4]] },
+                };
+                const lh = lunarHolidays[year];
+                if (lh) {
+                    lh.seollal.forEach(([m,d], i) => add(m, d, i===1?'설날':i===0?'설날 전날':'설날 다음날'));
+                    add(4, 5, '부처님오신날'); // 근사 (연도별 차이 있음)
+                    lh.chuseok.forEach(([m,d], i) => add(m, d, i===1?'추석':i===0?'추석 전날':'추석 다음날'));
+                }
+                return h;
+            }
+        };
+
+        // ==================== 데이터 관리 ====================
+        const DataStore = {
+            KEYS: {
+                MEMBERS: 'dashboard_members_v2',
+                DATA: 'dashboard_data_v2',
+                SESSION: 'dashboard_session'
+            },
+
+            defaultAdmin: {
+                id: 'admin_default',
+                name: '관리자',
+                password: Utils.hashPassword('1234'),
+                role: 'admin',
+                status: 'approved',
+                createdAt: new Date().toISOString()
+            },
+
+            init() {
+                // 기본 관리자 생성
+                let members = this.getMembers();
+                if (!members.find(m => m.name === '관리자')) {
+                    members.push(this.defaultAdmin);
+                    this.saveMembers(members);
+                }
+
+                // 기본 데이터 구조
+                if (!localStorage.getItem(this.KEYS.DATA)) {
+                    this.saveData({
+                        tasks: [],
+                        vacations: [],
+                        handovers: [],
+                        issues: []
+                    });
+                }
+            },
+
+            getMembers() {
+                try {
+                    return JSON.parse(localStorage.getItem(this.KEYS.MEMBERS)) || [];
+                } catch {
+                    return [];
+                }
+            },
+
+            saveMembers(members) {
+                localStorage.setItem(this.KEYS.MEMBERS, JSON.stringify(members));
+            },
+
+            getData() {
+                try {
+                    return JSON.parse(localStorage.getItem(this.KEYS.DATA)) || {
+                        tasks: [],
+                        vacations: [],
+                        handovers: [],
+                        issues: []
+                    };
+                } catch {
+                    return { tasks: [], vacations: [], handovers: [], issues: [] };
+                }
+            },
+
+            saveData(data) {
+                localStorage.setItem(this.KEYS.DATA, JSON.stringify(data));
+            },
+
+            getSession() {
+                try {
+                    return JSON.parse(sessionStorage.getItem(this.KEYS.SESSION));
+                } catch {
+                    return null;
+                }
+            },
+
+            setSession(user) {
+                sessionStorage.setItem(this.KEYS.SESSION, JSON.stringify(user));
+            },
+
+            clearSession() {
+                sessionStorage.removeItem(this.KEYS.SESSION);
+            }
+        };
+
+        // ==================== 인증 관리 ====================
+        const Auth = {
+            currentUser: null,
+
+            init() {
+                const session = DataStore.getSession();
+                if (session) {
+                    const members = DataStore.getMembers();
+                    const user = members.find(m => m.id === session.id && m.status === 'approved');
+                    if (user) {
+                        this.currentUser = user;
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            login(name, password) {
+                const members = DataStore.getMembers();
+                const user = members.find(m => 
+                    m.name === name && 
+                    m.password === Utils.hashPassword(password)
+                );
+
+                if (!user) {
+                    return { success: false, error: '이름 또는 비밀번호가 올바르지 않습니다.' };
+                }
+
+                if (user.status === 'pending') {
+                    return { success: false, error: '가입 승인 대기 중입니다.' };
+                }
+
+                if (user.status === 'rejected') {
+                    return { success: false, error: '가입이 거절되었습니다.' };
+                }
+
+                this.currentUser = user;
+                DataStore.setSession({ id: user.id });
+                return { success: true };
+            },
+
+            signup(name, password, empNo, worksite, dept) {
+                if (!Utils.validateName(name)) {
+                    return { success: false, error: '이름은 2자 이상이어야 합니다.' };
+                }
+
+                if (!Utils.validatePin(password)) {
+                    return { success: false, error: '비밀번호는 4자리 숫자여야 합니다.' };
+                }
+
+                if (!empNo || !empNo.trim()) {
+                    return { success: false, error: '사번을 입력하세요.' };
+                }
+
+                if (!worksite || !worksite.trim()) {
+                    return { success: false, error: '근무지를 입력하세요.' };
+                }
+
+                if (!dept || !dept.trim()) {
+                    return { success: false, error: '부서를 입력하세요.' };
+                }
+
+                const members = DataStore.getMembers();
+                if (members.find(m => m.name === name)) {
+                    return { success: false, error: '이미 존재하는 이름입니다.' };
+                }
+
+                const newMember = {
+                    id: Utils.generateId(),
+                    name: name.trim(),
+                    empNo: empNo.trim(),
+                    worksite: worksite.trim(),
+                    dept: dept.trim(),
+                    password: Utils.hashPassword(password),
+                    role: 'staff',
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
+
+                members.push(newMember);
+                DataStore.saveMembers(members);
+                return { success: true };
+            },
+
+            logout() {
+                this.currentUser = null;
+                DataStore.clearSession();
+            },
+
+            changePassword(oldPw, newPw) {
+                if (!Utils.validatePin(newPw)) {
+                    return { success: false, error: '비밀번호는 4자리 숫자여야 합니다.' };
+                }
+
+                if (Utils.hashPassword(oldPw) !== this.currentUser.password) {
+                    return { success: false, error: '현재 비밀번호가 올바르지 않습니다.' };
+                }
+
+                const members = DataStore.getMembers();
+                const idx = members.findIndex(m => m.id === this.currentUser.id);
+                if (idx !== -1) {
+                    members[idx].password = Utils.hashPassword(newPw);
+                    DataStore.saveMembers(members);
+                    this.currentUser.password = members[idx].password;
+                    return { success: true };
+                }
+                return { success: false, error: '사용자를 찾을 수 없습니다.' };
+            },
+
+            isAdmin() {
+                return this.currentUser?.role === 'admin';
+            }
+        };
+
+        // ==================== UI 컴포넌트 ====================
+        const Components = {
+            // 배지 생성
+            badge(text, type) {
+                return `<span class="badge badge-${type}">${Utils.escapeHtml(text)}</span>`;
+            },
+
+            // 업무 상태 배지
+            statusBadge(status) {
+                const map = {
+                    'progress': { text: '진행', type: 'progress' },
+                    'done': { text: '완료', type: 'done' }
+                };
+                const s = map[status] || { text: status, type: 'progress' };
+                return this.badge(s.text, s.type);
+            },
+
+            // 중요도 배지
+            priorityBadge(priority) {
+                const map = {
+                    'high': { text: '상', type: 'high' },
+                    'mid': { text: '중', type: 'mid' },
+                    'low': { text: '하', type: 'low' }
+                };
+                const p = map[priority] || { text: priority, type: 'mid' };
+                return this.badge(p.text, p.type);
+            },
+
+            // 승인 상태 배지
+            approvalBadge(status) {
+                const map = {
+                    'pending': { text: '대기', type: 'pending' },
+                    'approved': { text: '승인', type: 'approved' },
+                    'rejected': { text: '거절', type: 'rejected' }
+                };
+                const s = map[status] || { text: status, type: 'pending' };
+                return this.badge(s.text, s.type);
+            },
+
+            // 직원 선택 옵션
+            staffOptions(includeAll = false) {
+                const members = DataStore.getMembers().filter(m => m.status === 'approved');
+                let options = includeAll ? '<option value="">전체</option>' : '';
+                members.forEach(m => {
+                    options += `<option value="${Utils.escapeHtml(m.name)}">${Utils.escapeHtml(m.name)}</option>`;
+                });
+                return options;
+            },
+
+            // 모달 표시
+            showModal(title, content, onClose) {
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop';
+                backdrop.innerHTML = `
+                    <div class="modal">
+                        <h3 class="modal-title">${Utils.escapeHtml(title)}</h3>
+                        <div class="modal-body">${content}</div>
+                    </div>
+                `;
+                
+                backdrop.addEventListener('click', (e) => {
+                    if (e.target === backdrop) {
+                        backdrop.remove();
+                        if (onClose) onClose();
+                    }
+                });
+
+                document.body.appendChild(backdrop);
+                return backdrop;
+            },
+
+            // 확인 대화상자
+            confirm(message) {
+                return window.confirm(message);
+            },
+
+            // 알림
+            alert(message) {
+                window.alert(message);
+            }
+        };
+
+        // ==================== 페이지 렌더링 ====================
+        const Pages = {
+
+            // 휴가 달력 렌더러 (대시보드용)
+            vacationCalendar(yearMonth, vacations, handovers) {
+                const [year, month] = yearMonth.split('-').map(Number);
+                const firstDay = new Date(year, month - 1, 1).getDay();
+                const lastDate = new Date(year, month, 0).getDate();
+                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+                // 한국 공휴일 (고정 + 해당 연도 음력 포함)
+                const holidays = Utils.getKoreanHolidays(year);
+
+                // 날짜별 휴가 맵
+                const vacMap = {};
+                vacations.forEach(v => {
+                    v.dates.forEach(d => {
+                        if (!vacMap[d]) vacMap[d] = [];
+                        vacMap[d].push(v);
+                    });
+                });
+
+                const colors = ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e91e63'];
+                const nameColorMap = {};
+                let colorIdx = 0;
+                vacations.forEach(v => {
+                    if (!nameColorMap[v.name]) nameColorMap[v.name] = colors[colorIdx++ % colors.length];
+                });
+
+                let html = `<div class="vac-calendar">`;
+                html += `<div class="vac-cal-grid">`;
+                dayNames.forEach((d, i) => {
+                    const color = i === 0 ? 'color:#e74c3c' : i === 6 ? 'color:#3498db' : '';
+                    html += `<div class="vac-cal-header" style="${color}">${d}</div>`;
+                });
+                for (let i = 0; i < firstDay; i++) html += `<div class="vac-cal-cell empty"></div>`;
+                for (let day = 1; day <= lastDate; day++) {
+                    const iso = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                    const isToday = iso === Utils.today();
+                    const dayOfWeek = new Date(year, month - 1, day).getDay();
+                    const isSun = dayOfWeek === 0, isSat = dayOfWeek === 6;
+                    const dayVacs = vacMap[iso] || [];
+                    const holiday = holidays[iso];
+                    const isHoliday = !!holiday || isSun || isSat;
+
+                    html += `<div class="vac-cal-cell${isToday ? ' today' : ''}${isHoliday ? ' holiday-cell' : ''}">`;
+                    html += `<div class="vac-cal-date" style="${(isSun||holiday) ? 'color:#e74c3c' : isSat ? 'color:#3498db' : ''}">${day}</div>`;
+                    if (holiday) {
+                        html += `<div class="vac-cal-holiday">${Utils.escapeHtml(holiday)}</div>`;
+                    }
+                    dayVacs.forEach(v => {
+                        const bg = nameColorMap[v.name] || '#999';
+                        html += `<div class="vac-cal-event" style="background:${bg}"
+                            onclick="App.showHandoverModal('${Utils.escapeHtml(v.name)}', '${iso}')"
+                            title="${Utils.escapeHtml(v.name)} (${Utils.escapeHtml(v.type)}) - 클릭시 인수인계 확인">
+                            ${Utils.escapeHtml(v.name)} <span style="opacity:.75;font-size:.65rem">${Utils.escapeHtml(v.type)}</span>
+                        </div>`;
+                    });
+                    html += `</div>`;
+                }
+                html += `</div>`;
+                if (Object.keys(nameColorMap).length > 0) {
+                    html += `<div class="vac-cal-legend">`;
+                    Object.entries(nameColorMap).forEach(([name, color]) => {
+                        html += `<span class="vac-cal-legend-item">
+                            <span style="background:${color};width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px"></span>
+                            ${Utils.escapeHtml(name)}
+                        </span>`;
+                    });
+                    html += `</div>`;
+                } else {
+                    html += `<p style="color:#999;text-align:center;padding:.5rem">이번 달 휴가가 없습니다.</p>`;
+                }
+                html += `</div>`;
+                return html;
+            },
+
+            // 대시보드
+            dashboard() {
+                const data = DataStore.getData();
+                const today = Utils.today();
+                const offset = App._weekOffset || 0;
+                const isAdmin = Auth.isAdmin();
+
+                // 현재 보는 주의 월요일
+                const baseDate = new Date();
+                baseDate.setDate(baseDate.getDate() + offset * 7);
+                const weekStart = Utils.getWeekStart(baseDate);
+
+                // 현재 주 날짜 (월~금)
+                const weekDates = [];
+                for (let i = 0; i < 5; i++) {
+                    const d = new Date(weekStart);
+                    d.setDate(d.getDate() + i);
+                    weekDates.push(Utils.formatDate(d));
+                }
+
+                // 전주 월~금
+                const prevWeekStart = new Date(weekStart);
+                prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+                const prevWeekDates = [];
+                for (let i = 0; i < 5; i++) {
+                    const d = new Date(prevWeekStart);
+                    d.setDate(d.getDate() + i);
+                    prevWeekDates.push(Utils.formatDate(d));
+                }
+
+                const weekLabel = `${weekDates[0].substring(5)} ~ ${weekDates[4].substring(5)}`;
+                const prevWeekLabel = `${prevWeekDates[0].substring(5)} ~ ${prevWeekDates[4].substring(5)}`;
+                const isCurrentWeek = offset === 0;
+                const dayNames = ['월', '화', '수', '목', '금'];
+
+                // ── 직원별 업무 계산 헬퍼 ──
+                const getTasksFor = (userName) => {
+                    return data.tasks.filter(t =>
+                        t.assignee === userName || (!t.assignee && t.createdBy === userName)
+                    );
+                };
+
+                // 현재 로그인 유저 기준 데이터
+                const myTasks = getTasksFor(Auth.currentUser.name);
+
+                // 이월 업무: 현재 보는 주 시작일(월요일) 이전 날짜 중 진행중(progress)인 모든 업무
+                const carryTasks = myTasks.filter(t =>
+                    t.status === 'progress' && t.date < weekDates[0]
+                );
+
+                // 현재 주 업무
+                const weekTasks = myTasks.filter(t =>
+                    t.status === 'done'
+                        ? weekDates.includes(t.date)
+                        : t.date >= weekDates[0] && t.date <= weekDates[4]
+                );
+
+                // 이슈
+                const activeIssues = data.issues.filter(i => i.active);
+
+                // 달력 월
+                const calMonth = `${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}`;
+                const monthVacations = data.vacations.filter(v =>
+                    v.dates.some(d => d.startsWith(calMonth))
+                );
+
+                // 관리자 전체 직원 목록
+                const allMembers = DataStore.getMembers().filter(m => m.status === 'approved' && m.role !== 'admin');
+
+                // 주간 그리드 렌더 헬퍼
+                const renderWeekGrid = (tasks, dates, dNames) => {
+                    return `<div class="week-grid">
+                        ${dates.map((date, idx) => {
+                            const dayTasks = tasks.filter(t => t.date === date);
+                            const isToday = date === today;
+                            return `
+                                <div class="day-column${isToday ? ' today-col' : ''}">
+                                    <div class="day-header${isToday ? ' today-header' : ''}">${dNames[idx]} (${date.substring(5)})</div>
+                                    ${dayTasks.map(t => `
+                                        <div class="day-task ${t.priority}">
+                                            ${Components.statusBadge(t.status)}
+                                            ${Utils.escapeHtml(t.content.substring(0, 20))}${t.content.length > 20 ? '…' : ''}
+                                        </div>
+                                    `).join('')}
+                                    ${dayTasks.length === 0 ? '<div style="color:#999;font-size:.85rem;text-align:center;padding:.5rem 0">-</div>' : ''}
+                                </div>`;
+                        }).join('')}
+                    </div>`;
+                };
+
+                return `
+                    <div class="dashboard-grid">
+
+                        <!-- ① 이월 업무 카드 (전주 진행중) -->
+                        <div class="card dashboard-full">
+                            <div class="carry-header">
+                                <span>🔄 이월 업무 현황</span>
+                                <span class="carry-sub">이번 주(${weekDates[0].substring(5)}) 이전 미완료 진행중 업무</span>
+                            </div>
+                            ${(() => {
+                                // 관리자: 전체 직원 이월 업무 / 직원: 본인 이월 업무
+                                const displayCarry = isAdmin
+                                    ? data.tasks.filter(t => t.status === 'progress' && t.date < weekDates[0])
+                                    : carryTasks;
+
+                                if (displayCarry.length === 0) {
+                                    return `<p class="carry-empty">이월된 미완료 업무가 없습니다. 👍</p>`;
+                                }
+
+                                // 관리자: 담당자 컬럼 추가
+                                const headHtml = isAdmin
+                                    ? `<div class="carry-row carry-row-head" style="grid-template-columns:90px 80px 1fr 60px 55px">
+                                          <span>날짜</span><span>담당자</span><span>업무 내용</span><span>중요도</span><span>소요시간</span>
+                                       </div>`
+                                    : `<div class="carry-row carry-row-head">
+                                          <span>날짜</span><span>업무 내용</span><span>중요도</span><span>소요시간</span>
+                                       </div>`;
+
+                                const rowsHtml = displayCarry
+                                    .sort((a, b) => a.date.localeCompare(b.date))
+                                    .map(t => isAdmin
+                                        ? `<div class="carry-row" style="grid-template-columns:90px 80px 1fr 60px 55px">
+                                               <span class="carry-date">${t.date}</span>
+                                               <span style="font-weight:600">${Utils.escapeHtml(t.assignee || t.createdBy)}</span>
+                                               <span>${Utils.escapeHtml(t.content)}</span>
+                                               <span>${Components.priorityBadge(t.priority)}</span>
+                                               <span>${t.duration}h</span>
+                                           </div>`
+                                        : `<div class="carry-row">
+                                               <span class="carry-date">${t.date}</span>
+                                               <span>${Utils.escapeHtml(t.content)}</span>
+                                               <span>${Components.priorityBadge(t.priority)}</span>
+                                               <span>${t.duration}h</span>
+                                           </div>`
+                                    ).join('');
+
+                                return `<div class="carry-list">${headHtml}${rowsHtml}</div>`;
+                            })()}
+                        </div>
+
+                        <!-- ② 내 주간 업무 현황 (직원만 표시) -->
+                        ${!isAdmin ? `
+                        <div class="card dashboard-full">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+                                <button class="btn btn-secondary btn-sm" onclick="App.changeWeekOffset(-1)">◀ 전주</button>
+                                <h3 style="margin:0;font-size:1.05rem">
+                                    📅 업무현황 · ${weekLabel}
+                                    ${isCurrentWeek ? '<span style="background:var(--primary);color:#fff;font-size:.72rem;padding:2px 8px;border-radius:999px;margin-left:6px">이번 주</span>' : ''}
+                                </h3>
+                                <button class="btn btn-secondary btn-sm" onclick="App.changeWeekOffset(1)">다음주 ▶</button>
+                            </div>
+                            ${renderWeekGrid(weekTasks, weekDates, dayNames)}
+                        </div>
+                        ` : ''}
+
+                        ${isAdmin ? `
+                        <!-- ③ 관리자 전체 직원 업무현황 -->
+                        <div class="card dashboard-full">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+                                <button class="btn btn-secondary btn-sm" onclick="App.changeWeekOffset(-1)">◀ 전주</button>
+                                <h3 style="margin:0;font-size:1.05rem">
+                                    👥 전체 직원 업무현황 · ${weekLabel}
+                                    ${isCurrentWeek ? '<span style="background:var(--primary);color:#fff;font-size:.72rem;padding:2px 8px;border-radius:999px;margin-left:6px">이번 주</span>' : ''}
+                                </h3>
+                                <button class="btn btn-secondary btn-sm" onclick="App.changeWeekOffset(1)">다음주 ▶</button>
+                            </div>
+                            <div style="overflow-x:auto">
+                                <table class="staff-week-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width:70px">직원</th>
+                                            <th>이월</th>
+                                            ${dayNames.map((d, i) => `<th>${d}<br><span style="font-weight:400;font-size:.78rem">${weekDates[i].substring(5)}</span></th>`).join('')}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${allMembers.map(m => {
+                                            const mTasks = getTasksFor(m.name);
+                                            const mCarry = mTasks.filter(t =>
+                                                t.status === 'progress' && t.date < weekDates[0]
+                                            );
+                                            const mWeek = mTasks.filter(t =>
+                                                t.status === 'done'
+                                                    ? weekDates.includes(t.date)
+                                                    : t.date >= weekDates[0] && t.date <= weekDates[4]
+                                            );
+                                            return `<tr>
+                                                <td style="font-weight:600">${Utils.escapeHtml(m.name)}</td>
+                                                <td>${mCarry.length > 0
+                                                    ? mCarry.map(t => `<div class="staff-task-chip carry-chip">${Utils.escapeHtml(t.content.substring(0,15))}${t.content.length>15?'…':''}</div>`).join('')
+                                                    : '<span style="color:#aaa;font-size:.8rem">없음</span>'
+                                                }</td>
+                                                ${weekDates.map(date => {
+                                                    const dt = mWeek.filter(t => t.date === date);
+                                                    return `<td>${dt.length > 0
+                                                        ? dt.map(t => `<div class="staff-task-chip ${t.priority}-chip">${Components.statusBadge(t.status)} ${Utils.escapeHtml(t.content.substring(0,15))}${t.content.length>15?'…':''}</div>`).join('')
+                                                        : '<span style="color:#aaa;font-size:.8rem">-</span>'
+                                                    }</td>`;
+                                                }).join('')}
+                                            </tr>`;
+                                        }).join('')}
+                                        ${allMembers.length === 0 ? '<tr><td colspan="7" style="text-align:center;color:#aaa">승인된 직원이 없습니다.</td></tr>' : ''}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- ④ 이슈 -->
+                        <div class="card">
+                            <h3 class="card-title">⚠️ 진행 중 이슈</h3>
+                            ${activeIssues.length === 0 ? '<p style="color:#999">현재 이슈가 없습니다.</p>' : ''}
+                            ${activeIssues.map(issue => `
+                                <div class="issue-item ${issue.urgent ? 'urgent' : ''}">
+                                    <strong>${issue.urgent ? '🚨 ' : ''}${Utils.escapeHtml(issue.title)}</strong>
+                                    <p style="margin-top:.25rem;font-size:.9rem">${Utils.escapeHtml(issue.content)}</p>
+                                    <small style="color:#999">${issue.createdAt.substring(0, 10)}</small>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- ⑤ 휴가 달력 -->
+                        <div class="card dashboard-full">
+                            <h3 class="card-title">🏖️ ${calMonth} 휴가 달력</h3>
+                            ${Pages.vacationCalendar(calMonth, monthVacations, data.handovers)}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // 업무 관리
+            tasks() {
+                const data = DataStore.getData();
+                const isAdmin = Auth.isAdmin();
+                
+                // 필터링된 업무
+                const myTasks = isAdmin ? data.tasks : data.tasks.filter(t => 
+                    t.assignee === Auth.currentUser.name || 
+                    (!t.assignee && t.createdBy === Auth.currentUser.name)
+                );
+
+                return `
+                    <div class="card">
+                        <h3 class="card-title">✏️ 업무 작성</h3>
+                        <form id="taskForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>날짜</label>
+                                    <input type="date" id="taskDate" class="form-control" value="${Utils.today()}" required>
+                                </div>
+                                ${isAdmin ? `
+                                <div class="form-group">
+                                    <label>담당자</label>
+                                    <select id="taskAssignee" class="form-control">
+                                        ${Components.staffOptions(true)}
+                                    </select>
+                                </div>
+                                ` : ''}
+                                <div class="form-group">
+                                    <label>중요도</label>
+                                    <select id="taskPriority" class="form-control">
+                                        <option value="mid">중</option>
+                                        <option value="high">상</option>
+                                        <option value="low">하</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>소요시간</label>
+                                    <select id="taskDuration" class="form-control">
+                                        ${[0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8].map(h => 
+                                            `<option value="${h}">${h}시간</option>`
+                                        ).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>업무 내용</label>
+                                <textarea id="taskContent" class="form-control" rows="3" required placeholder="업무 내용을 입력하세요"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">업무 등록</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">📋 업무 목록</h3>
+                        <div class="form-row mb-2">
+                            <div class="form-group">
+                                <label>상태 필터</label>
+                                <select id="filterStatus" class="form-control">
+                                    <option value="">전체</option>
+                                    <option value="progress">진행</option>
+                                    <option value="done">완료</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>기간</label>
+                                <input type="month" id="filterMonth" class="form-control" value="${Utils.today().substring(0, 7)}">
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table id="taskTable">
+                                <thead>
+                                    <tr>
+                                        <th>날짜</th>
+                                        <th>담당자</th>
+                                        <th>내용</th>
+                                        <th>중요도</th>
+                                        <th>소요시간</th>
+                                        <th>상태</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${myTasks.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 50).map(t => {
+                                        const isOwner = Auth.isAdmin() || (t.assignee || t.createdBy) === Auth.currentUser.name;
+                                        const durationOptions = [0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8]
+                                            .map(h => `<option value="${h}" ${t.duration === h ? 'selected' : ''}>${h}시간</option>`)
+                                            .join('');
+                                        return `
+                                        <tr data-id="${t.id}" data-date="${t.date}" data-status="${t.status}">
+                                            <td>${t.date}</td>
+                                            <td>${Utils.escapeHtml(t.assignee || t.createdBy)}</td>
+                                            <td>${Utils.escapeHtml(t.content)}</td>
+                                            <td>${Components.priorityBadge(t.priority)}</td>
+                                            <td>${isOwner
+                                                ? `<select class="form-control" style="padding:3px 6px;font-size:.82rem;min-width:80px"
+                                                    onchange="App.updateDuration('${t.id}', this.value)">${durationOptions}</select>`
+                                                : `${t.duration}h`
+                                            }</td>
+                                            <td>${Components.statusBadge(t.status)}</td>
+                                            <td>
+                                                ${isOwner ? `
+                                                <div class="btn-group">
+                                                    ${t.status === 'progress' ? 
+                                                        `<button class="btn btn-success btn-sm" onclick="App.completeTask('${t.id}')">완료</button>` : 
+                                                        `<button class="btn btn-secondary btn-sm" onclick="App.reopenTask('${t.id}')">재개</button>`
+                                                    }
+                                                    <button class="btn btn-danger btn-sm" onclick="App.deleteTask('${t.id}')">삭제</button>
+                                                </div>` : '-'}
+                                            </td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // 휴가 계획
+            vacation() {
+                const data = DataStore.getData();
+                const isAdmin = Auth.isAdmin();
+                
+                const myVacations = isAdmin ? data.vacations : 
+                    data.vacations.filter(v => v.name === Auth.currentUser.name);
+
+                return `
+                    <div class="card">
+                        <h3 class="card-title">🏖️ 휴가 신청</h3>
+                        <form id="vacationForm">
+                            <div class="form-row">
+                                ${isAdmin ? `
+                                <div class="form-group">
+                                    <label>신청자</label>
+                                    <select id="vacationName" class="form-control">
+                                        ${Components.staffOptions(false)}
+                                    </select>
+                                </div>
+                                ` : ''}
+                                <div class="form-group">
+                                    <label>휴가 유형</label>
+                                    <select id="vacationType" class="form-control">
+                                        <option value="반반차">반반차</option>
+                                        <option value="반차">반차</option>
+                                        <option value="연차">연차</option>
+                                        <option value="경조사">경조사</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>시작일</label>
+                                    <input type="date" id="vacationStart" class="form-control" value="${Utils.today()}" required>
+                                </div>
+                                <div class="form-group" id="vacationEndGroup" style="display:none">
+                                    <label>종료일</label>
+                                    <input type="date" id="vacationEnd" class="form-control" value="${Utils.today()}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>메모</label>
+                                <input type="text" id="vacationMemo" class="form-control" placeholder="선택사항">
+                            </div>
+                            <button type="submit" class="btn btn-primary">휴가 등록</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">📅 휴가 현황</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>이름</th>
+                                        <th>유형</th>
+                                        <th>일정</th>
+                                        <th>메모</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${myVacations.sort((a, b) => b.dates[0].localeCompare(a.dates[0])).map(v => {
+                                        const isOwner = Auth.isAdmin() || v.name === Auth.currentUser.name;
+                                        return `
+                                        <tr>
+                                            <td>${Utils.escapeHtml(v.name)}</td>
+                                            <td>${Utils.escapeHtml(v.type)}</td>
+                                            <td>
+                                                ${v.dates.map(d => `
+                                                    <span class="vac-date-link" onclick="App.goToHandoverWithDate('${d}')" title="클릭하여 인수인계 작성">${d}</span>
+                                                `).join(' ')}
+                                            </td>
+                                            <td>${Utils.escapeHtml(v.memo || '-')}</td>
+                                            <td>
+                                                ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="App.deleteVacation('${v.id}')">삭제</button>` : '-'}
+                                            </td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // 인수인계
+            handover() {
+                const data = DataStore.getData();
+                const members = DataStore.getMembers().filter(m => m.status === 'approved');
+
+                return `
+                    <div class="card">
+                        <h3 class="card-title">📝 인수인계 작성</h3>
+                        <form id="handoverForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>인계자</label>
+                                    ${Auth.isAdmin() ? `
+                                    <select id="handoverFrom" class="form-control" required>
+                                        ${Components.staffOptions(false)}
+                                    </select>` : `
+                                    <input type="text" id="handoverFrom" class="form-control" value="${Utils.escapeHtml(Auth.currentUser.name)}" readonly style="background:var(--gray-100)">
+                                    `}
+                                </div>
+                                <div class="form-group">
+                                    <label>인수자</label>
+                                    <select id="handoverTo" class="form-control" required>
+                                        ${Components.staffOptions(false)}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>인계일</label>
+                                    <input type="date" id="handoverDate" class="form-control" value="${Utils.today()}" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>인계 업무</label>
+                                <textarea id="handoverContent" class="form-control" rows="4" required placeholder="인계할 업무 내용을 상세히 작성하세요"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">인수인계 등록</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">📋 인수인계 목록</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAllHandover"></th>
+                                        <th>인계일</th>
+                                        <th>인계자</th>
+                                        <th>인수자</th>
+                                        <th>내용</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.handovers.sort((a, b) => b.date.localeCompare(a.date)).map(h => {
+                                        const isOwner = Auth.isAdmin() || h.from === Auth.currentUser.name;
+                                        return `
+                                        <tr>
+                                            <td><input type="checkbox" class="handover-check" value="${h.id}"></td>
+                                            <td>${h.date}</td>
+                                            <td>${Utils.escapeHtml(h.from)}</td>
+                                            <td>${Utils.escapeHtml(h.to)}</td>
+                                            <td>${Utils.escapeHtml(h.content.substring(0, 50))}${h.content.length > 50 ? '...' : ''}</td>
+                                            <td>
+                                                ${isOwner ? `<button class="btn btn-danger btn-sm" onclick="App.deleteHandover('${h.id}')">삭제</button>` : '-'}
+                                            </td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-secondary mt-2" onclick="App.printHandovers()">선택 인쇄</button>
+                    </div>
+                `;
+            },
+
+            // 이슈 관리 (관리자)
+            issues() {
+                const data = DataStore.getData();
+
+                return `
+                    <div class="card">
+                        <h3 class="card-title">⚠️ 이슈 등록</h3>
+                        <form id="issueForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>제목</label>
+                                    <input type="text" id="issueTitle" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>긴급 여부</label>
+                                    <select id="issueUrgent" class="form-control">
+                                        <option value="false">일반</option>
+                                        <option value="true">긴급</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>내용</label>
+                                <textarea id="issueContent" class="form-control" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">이슈 등록</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">📋 이슈 목록</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>등록일</th>
+                                        <th>제목</th>
+                                        <th>내용</th>
+                                        <th>긴급</th>
+                                        <th>상태</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.issues.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(i => `
+                                        <tr>
+                                            <td>${i.createdAt.substring(0, 10)}</td>
+                                            <td>${Utils.escapeHtml(i.title)}</td>
+                                            <td>${Utils.escapeHtml(i.content.substring(0, 30))}...</td>
+                                            <td>${i.urgent ? '🚨 긴급' : '일반'}</td>
+                                            <td>${i.active ? Components.badge('진행', 'progress') : Components.badge('종료', 'done')}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    ${i.active ? 
+                                                        `<button class="btn btn-success btn-sm" onclick="App.closeIssue('${i.id}')">종료</button>` :
+                                                        `<button class="btn btn-secondary btn-sm" onclick="App.reopenIssue('${i.id}')">재개</button>`
+                                                    }
+                                                    <button class="btn btn-danger btn-sm" onclick="App.deleteIssue('${i.id}')">삭제</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // 업무 분석 (관리자)
+            analysis() {
+                const data = DataStore.getData();
+                const members = DataStore.getMembers().filter(m => m.status === 'approved' && m.role !== 'admin');
+                const currentMonth = Utils.today().substring(0, 7);
+
+                // 월간 완료 업무 통계
+                const monthTasks = data.tasks.filter(t => 
+                    t.date.startsWith(currentMonth) && t.status === 'done'
+                );
+
+                const stats = {};
+                members.forEach(m => {
+                    stats[m.name] = {
+                        count: 0,
+                        hours: 0,
+                        priority: { high: 0, mid: 0, low: 0 }
+                    };
+                });
+
+                monthTasks.forEach(t => {
+                    const name = t.assignee || t.createdBy;
+                    if (stats[name]) {
+                        stats[name].count++;
+                        stats[name].hours += t.duration || 0;
+                        stats[name].priority[t.priority]++;
+                    }
+                });
+
+                return `
+                    <div class="card">
+                        <h3 class="card-title">📊 ${currentMonth} 업무 분석</h3>
+                        <div class="form-group" style="max-width:200px">
+                            <label>분석 월</label>
+                            <input type="month" id="analysisMonth" class="form-control" value="${currentMonth}">
+                        </div>
+                        
+                        <div class="table-container mt-2">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>직원</th>
+                                        <th>완료 건수</th>
+                                        <th>총 소요시간</th>
+                                        <th>상/중/하</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Object.entries(stats).map(([name, s]) => `
+                                        <tr>
+                                            <td>${Utils.escapeHtml(name)}</td>
+                                            <td>${s.count}건</td>
+                                            <td>${s.hours}시간</td>
+                                            <td>${s.priority.high}/${s.priority.mid}/${s.priority.low}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3 class="card-title">⏱️ 소요시간 분포</h3>
+                            <div class="chart-container">
+                                <canvas id="hoursChart" width="200" height="200"></canvas>
+                                <div class="chart-legend" id="hoursLegend"></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title">📈 업무 건수 분포</h3>
+                            <div class="chart-container">
+                                <canvas id="countChart" width="200" height="200"></canvas>
+                                <div class="chart-legend" id="countLegend"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // 회원 관리 (관리자)
+            members() {
+                const members = DataStore.getMembers();
+
+                return `
+                    <div class="card">
+                        <h3 class="card-title">👥 회원 관리</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>이름</th>
+                                        <th>사번</th>
+                                        <th>근무지</th>
+                                        <th>부서</th>
+                                        <th>권한</th>
+                                        <th>상태</th>
+                                        <th>가입일</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${members.map(m => `
+                                        <tr>
+                                            <td>${Utils.escapeHtml(m.name)}</td>
+                                            <td>${Utils.escapeHtml(m.empNo || '-')}</td>
+                                            <td>${Utils.escapeHtml(m.worksite || '-')}</td>
+                                            <td>${Utils.escapeHtml(m.dept || '-')}</td>
+                                            <td>
+                                                ${m.id === Auth.currentUser.id
+                                                    ? `<span class="badge badge-approved">관리자 (나)</span>`
+                                                    : m.status === 'approved'
+                                                        ? `<select class="form-control" style="padding:3px 6px;font-size:.82rem;min-width:80px"
+                                                            onchange="App.changeRole('${m.id}', this.value)">
+                                                            <option value="staff" ${m.role !== 'admin' ? 'selected' : ''}>직원</option>
+                                                            <option value="admin" ${m.role === 'admin' ? 'selected' : ''}>관리자</option>
+                                                           </select>`
+                                                        : `<span>${m.role === 'admin' ? '관리자' : '직원'}</span>`
+                                                }
+                                            </td>
+                                            <td>${Components.approvalBadge(m.status)}</td>
+                                            <td>${m.createdAt ? m.createdAt.substring(0, 10) : '-'}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    ${m.status === 'pending' ? `
+                                                        <button class="btn btn-success btn-sm" onclick="App.approveMember('${m.id}')">승인</button>
+                                                        <button class="btn btn-danger btn-sm" onclick="App.rejectMember('${m.id}')">거절</button>
+                                                    ` : ''}
+                                                    ${m.id !== Auth.currentUser.id ? `
+                                                        <button class="btn btn-danger btn-sm" onclick="App.deleteMember('${m.id}')">삭제</button>
+                                                    ` : ''}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // ==================== 차트 ====================
+        const Charts = {
+            drawDonut(canvasId, legendId, data, colors) {
+                const canvas = document.getElementById(canvasId);
+                const legend = document.getElementById(legendId);
+                if (!canvas || !legend) return;
+
+                const ctx = canvas.getContext('2d');
+                const total = data.reduce((sum, d) => sum + d.value, 0);
+                
+                if (total === 0) {
+                    ctx.fillStyle = '#ddd';
+                    ctx.beginPath();
+                    ctx.arc(100, 100, 80, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(100, 100, 40, 0, Math.PI * 2);
+                    ctx.fill();
+                    legend.innerHTML = '<p style="color:#999">데이터 없음</p>';
+                    return;
+                }
+
+                let startAngle = -Math.PI / 2;
+                
+                data.forEach((d, i) => {
+                    const sliceAngle = (d.value / total) * Math.PI * 2;
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.beginPath();
+                    ctx.moveTo(100, 100);
+                    ctx.arc(100, 100, 80, startAngle, startAngle + sliceAngle);
+                    ctx.closePath();
+                    ctx.fill();
+                    startAngle += sliceAngle;
+                });
+
+                // 가운데 원 (도넛)
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(100, 100, 40, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 범례
+                legend.innerHTML = data.map((d, i) => `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background:${colors[i % colors.length]}"></div>
+                        <span>${Utils.escapeHtml(d.label)}: ${d.value}</span>
+                    </div>
+                `).join('');
+            }
+        };
+
+        // ==================== 앱 메인 ====================
+        const App = {
+            currentPage: 'dashboard',
+            _weekOffset: 0,
+
+            changeWeekOffset(delta) {
+                this._weekOffset += delta;
+                this.navigate('dashboard');
+            },
+
+            init() {
+                DataStore.init();
+                
+                if (Auth.init()) {
+                    this.showApp();
+                } else {
+                    this.showAuth();
+                }
+
+                this.bindEvents();
+            },
+
+            showAuth() {
+                document.getElementById('authScreen').classList.remove('hidden');
+                document.getElementById('appScreen').classList.add('hidden');
+            },
+
+            showApp() {
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('appScreen').classList.remove('hidden');
+                this._weekOffset = 0;
+                
+                // 관리자 메뉴 표시
+                document.querySelectorAll('.admin-only').forEach(el => {
+                    el.classList.toggle('hidden', !Auth.isAdmin());
+                });
+
+                // 사용자 정보
+                document.getElementById('userInfo').textContent = 
+                    `${Auth.currentUser.name} (${Auth.isAdmin() ? '관리자' : '직원'})`;
+
+                this.navigate('dashboard');
+                // 로그인 후 알림 실행 (푸시 포함)
+                Notif.run(true);
+            },
+
+            navigate(page) {
+                this.currentPage = page;
+                
+                // 네비게이션 활성화
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.page === page);
+                });
+
+                // 페이지 렌더링
+                const content = document.getElementById('mainContent');
+                if (Pages[page]) {
+                    content.innerHTML = Pages[page]();
+                    this.bindPageEvents(page);
+                }
+                // 알림 dot 갱신
+                Notif.updateDot();
+            },
+
+            bindEvents() {
+                // 탭 전환
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        
+                        const tab = btn.dataset.tab;
+                        document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+                        document.getElementById('signupForm').classList.toggle('hidden', tab !== 'signup');
+                    });
+                });
+
+                // 알림 벨 버튼
+                document.getElementById('notifBellBtn')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    Notif.togglePanel();
+                });
+
+                // 패널 외부 클릭 시 닫기
+                document.addEventListener('click', (e) => {
+                    const panel = document.getElementById('notifPanel');
+                    const bell = document.getElementById('notifBellBtn');
+                    if (panel && !panel.classList.contains('hidden') &&
+                        !panel.contains(e.target) && e.target !== bell && !bell?.contains(e.target)) {
+                        panel.classList.add('hidden');
+                    }
+                });
+
+                // 로그인
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('loginName').value.trim();
+                    const pw = document.getElementById('loginPw').value;
+                    
+                    const result = Auth.login(name, pw);
+                    if (result.success) {
+                        this.showApp();
+                    } else {
+                        const error = document.getElementById('loginError');
+                        error.textContent = result.error;
+                        error.classList.remove('hidden');
+                    }
+                });
+
+                // 회원가입
+                document.getElementById('signupForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('signupName').value.trim();
+                    const empNo = document.getElementById('signupEmpNo').value.trim();
+                    const worksite = document.getElementById('signupWorksite').value.trim();
+                    const dept = document.getElementById('signupDept').value.trim();
+                    const pw = document.getElementById('signupPw').value;
+                    const pwConfirm = document.getElementById('signupPwConfirm').value;
+                    
+                    const error = document.getElementById('signupError');
+                    const success = document.getElementById('signupSuccess');
+                    error.classList.add('hidden');
+                    success.classList.add('hidden');
+
+                    if (pw !== pwConfirm) {
+                        error.textContent = '비밀번호가 일치하지 않습니다.';
+                        error.classList.remove('hidden');
+                        return;
+                    }
+
+                    const result = Auth.signup(name, pw, empNo, worksite, dept);
+                    if (result.success) {
+                        success.textContent = '가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.';
+                        success.classList.remove('hidden');
+                        document.getElementById('signupForm').reset();
+                    } else {
+                        error.textContent = result.error;
+                        error.classList.remove('hidden');
+                    }
+                });
+
+                // 로그아웃
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    Auth.logout();
+                    this.showAuth();
+                });
+
+                // 비밀번호 변경
+                document.getElementById('changePwBtn').addEventListener('click', () => {
+                    const modal = Components.showModal('비밀번호 변경', `
+                        <form id="changePwForm">
+                            <div class="form-group">
+                                <label>현재 비밀번호</label>
+                                <input type="password" id="currentPw" class="form-control" maxlength="4" required>
+                            </div>
+                            <div class="form-group">
+                                <label>새 비밀번호</label>
+                                <input type="password" id="newPw" class="form-control" maxlength="4" required>
+                            </div>
+                            <div class="form-group">
+                                <label>새 비밀번호 확인</label>
+                                <input type="password" id="newPwConfirm" class="form-control" maxlength="4" required>
+                            </div>
+                            <p id="changePwError" class="text-danger hidden"></p>
+                            <button type="submit" class="btn btn-primary">변경</button>
+                        </form>
+                    `);
+
+                    modal.querySelector('#changePwForm').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const current = modal.querySelector('#currentPw').value;
+                        const newPw = modal.querySelector('#newPw').value;
+                        const confirm = modal.querySelector('#newPwConfirm').value;
+                        const error = modal.querySelector('#changePwError');
+
+                        if (newPw !== confirm) {
+                            error.textContent = '새 비밀번호가 일치하지 않습니다.';
+                            error.classList.remove('hidden');
+                            return;
+                        }
+
+                        const result = Auth.changePassword(current, newPw);
+                        if (result.success) {
+                            Components.alert('비밀번호가 변경되었습니다.');
+                            modal.remove();
+                        } else {
+                            error.textContent = result.error;
+                            error.classList.remove('hidden');
+                        }
+                    });
+                });
+
+                // 네비게이션
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.navigate(btn.dataset.page);
+                    });
+                });
+            },
+
+            bindPageEvents(page) {
+                switch (page) {
+                    case 'tasks':
+                        this.bindTaskEvents();
+                        break;
+                    case 'vacation':
+                        this.bindVacationEvents();
+                        break;
+                    case 'handover':
+                        this.bindHandoverEvents();
+                        break;
+                    case 'issues':
+                        this.bindIssueEvents();
+                        break;
+                    case 'analysis':
+                        this.renderAnalysisCharts();
+                        this.bindAnalysisEvents();
+                        break;
+                }
+            },
+
+            bindTaskEvents() {
+                document.getElementById('taskForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const data = DataStore.getData();
+                    const assignee = document.getElementById('taskAssignee')?.value || '';
+                    // 일반 직원은 본인 업무만 등록 가능
+                    if (!Auth.isAdmin() && assignee && assignee !== Auth.currentUser.name) {
+                        Components.alert('본인의 업무만 등록할 수 있습니다.');
+                        return;
+                    }
+                    const task = {
+                        id: Utils.generateId(),
+                        date: document.getElementById('taskDate').value,
+                        content: document.getElementById('taskContent').value.trim(),
+                        priority: document.getElementById('taskPriority').value,
+                        duration: parseFloat(document.getElementById('taskDuration').value),
+                        status: 'progress',
+                        createdBy: Auth.currentUser.name,
+                        assignee: Auth.isAdmin() ? assignee : Auth.currentUser.name,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    data.tasks.push(task);
+                    DataStore.saveData(data);
+                    this.navigate('tasks');
+                });
+
+                // 필터
+                document.getElementById('filterStatus').addEventListener('change', () => this.filterTasks());
+                document.getElementById('filterMonth').addEventListener('change', () => this.filterTasks());
+            },
+
+            filterTasks() {
+                const status = document.getElementById('filterStatus').value;
+                const month = document.getElementById('filterMonth').value;
+                
+                document.querySelectorAll('#taskTable tbody tr').forEach(row => {
+                    const rowStatus = row.dataset.status;
+                    const rowDate = row.dataset.date;
+                    
+                    const statusMatch = !status || rowStatus === status;
+                    const monthMatch = !month || rowDate.startsWith(month);
+                    
+                    row.style.display = statusMatch && monthMatch ? '' : 'none';
+                });
+            },
+
+            completeTask(id) {
+                const data = DataStore.getData();
+                const task = data.tasks.find(t => t.id === id);
+                if (!task) return;
+                if (!Auth.isAdmin() && (task.assignee || task.createdBy) !== Auth.currentUser.name) {
+                    Components.alert('본인의 업무만 수정할 수 있습니다.');
+                    return;
+                }
+                task.status = 'done';
+                task.completedAt = new Date().toISOString();
+                DataStore.saveData(data);
+                this.navigate('tasks');
+                Notif.run(false);
+            },
+
+            reopenTask(id) {
+                const data = DataStore.getData();
+                const task = data.tasks.find(t => t.id === id);
+                if (!task) return;
+                if (!Auth.isAdmin() && (task.assignee || task.createdBy) !== Auth.currentUser.name) {
+                    Components.alert('본인의 업무만 수정할 수 있습니다.');
+                    return;
+                }
+                task.status = 'progress';
+                delete task.completedAt;
+                DataStore.saveData(data);
+                this.navigate('tasks');
+                Notif.run(false);
+            },
+
+            deleteTask(id) {
+                const data = DataStore.getData();
+                const task = data.tasks.find(t => t.id === id);
+                if (!task) return;
+                if (!Auth.isAdmin() && (task.assignee || task.createdBy) !== Auth.currentUser.name) {
+                    Components.alert('본인의 업무만 삭제할 수 있습니다.');
+                    return;
+                }
+                if (!Components.confirm('정말 삭제하시겠습니까?')) return;
+                data.tasks = data.tasks.filter(t => t.id !== id);
+                DataStore.saveData(data);
+                this.navigate('tasks');
+                Notif.run(false);
+            },
+
+            updateDuration(id, value) {
+                const data = DataStore.getData();
+                const task = data.tasks.find(t => t.id === id);
+                if (!task) return;
+                if (!Auth.isAdmin() && (task.assignee || task.createdBy) !== Auth.currentUser.name) {
+                    Components.alert('본인의 업무만 수정할 수 있습니다.');
+                    return;
+                }
+                task.duration = parseFloat(value);
+                DataStore.saveData(data);
+            },
+
+            bindVacationEvents() {
+                const typeSelect = document.getElementById('vacationType');
+                const endGroup = document.getElementById('vacationEndGroup');
+
+                typeSelect.addEventListener('change', () => {
+                    const type = typeSelect.value;
+                    endGroup.style.display = (type === '연차' || type === '경조사') ? 'block' : 'none';
+                });
+
+                document.getElementById('vacationForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const data = DataStore.getData();
+                    const reqName = document.getElementById('vacationName')?.value || Auth.currentUser.name;
+                    // 일반 직원은 본인 휴가만 등록 가능
+                    if (!Auth.isAdmin() && reqName !== Auth.currentUser.name) {
+                        Components.alert('본인의 휴가만 등록할 수 있습니다.');
+                        return;
+                    }
+                    const type = document.getElementById('vacationType').value;
+                    const start = document.getElementById('vacationStart').value;
+                    const end = document.getElementById('vacationEnd').value;
+                    
+                    let dates = [start];
+                    if ((type === '연차' || type === '경조사') && end && end >= start) {
+                        dates = Utils.getDateRange(start, end);
+                    }
+
+                    const vacation = {
+                        id: Utils.generateId(),
+                        name: reqName,
+                        type: type,
+                        dates: dates,
+                        memo: document.getElementById('vacationMemo').value.trim(),
+                        createdAt: new Date().toISOString()
+                    };
+
+                    data.vacations.push(vacation);
+                    DataStore.saveData(data);
+                    this.navigate('vacation');
+                });
+            },
+
+            deleteVacation(id) {
+                const data = DataStore.getData();
+                const vac = data.vacations.find(v => v.id === id);
+                if (!vac) return;
+                if (!Auth.isAdmin() && vac.name !== Auth.currentUser.name) {
+                    Components.alert('본인의 휴가만 삭제할 수 있습니다.');
+                    return;
+                }
+                if (!Components.confirm('정말 삭제하시겠습니까?')) return;
+                data.vacations = data.vacations.filter(v => v.id !== id);
+                DataStore.saveData(data);
+                this.navigate('vacation');
+            },
+
+            bindHandoverEvents() {
+                document.getElementById('handoverForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const data = DataStore.getData();
+                    const fromVal = document.getElementById('handoverFrom').value;
+                    // 일반 직원은 본인 인수인계만 등록 가능
+                    if (!Auth.isAdmin() && fromVal !== Auth.currentUser.name) {
+                        Components.alert('본인의 인수인계만 등록할 수 있습니다.');
+                        return;
+                    }
+                    const handover = {
+                        id: Utils.generateId(),
+                        from: fromVal,
+                        to: document.getElementById('handoverTo').value,
+                        date: document.getElementById('handoverDate').value,
+                        content: document.getElementById('handoverContent').value.trim(),
+                        createdAt: new Date().toISOString()
+                    };
+
+                    data.handovers.push(handover);
+                    DataStore.saveData(data);
+                    this.navigate('handover');
+                    Notif.run(false);
+                });
+
+                // 전체 선택
+                document.getElementById('selectAllHandover').addEventListener('change', (e) => {
+                    document.querySelectorAll('.handover-check').forEach(cb => {
+                        cb.checked = e.target.checked;
+                    });
+                });
+            },
+
+            deleteHandover(id) {
+                const data = DataStore.getData();
+                const handover = data.handovers.find(h => h.id === id);
+                if (!handover) return;
+                if (!Auth.isAdmin() && handover.from !== Auth.currentUser.name) {
+                    Components.alert('본인의 인수인계만 삭제할 수 있습니다.');
+                    return;
+                }
+                if (!Components.confirm('정말 삭제하시겠습니까?')) return;
+                data.handovers = data.handovers.filter(h => h.id !== id);
+                DataStore.saveData(data);
+                this.navigate('handover');
+            },
+
+            printHandovers() {
+                const selected = Array.from(document.querySelectorAll('.handover-check:checked')).map(cb => cb.value);
+                if (selected.length === 0) {
+                    Components.alert('인쇄할 항목을 선택해주세요.');
+                    return;
+                }
+
+                const data = DataStore.getData();
+                const handovers = data.handovers.filter(h => selected.includes(h.id));
+
+                const printArea = document.getElementById('printArea');
+                printArea.innerHTML = `
+                    <div class="print-header">
+                        <div class="print-title">업무 인수인계서</div>
+                        <div>출력일: ${Utils.today()}</div>
+                    </div>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th style="width:15%">인계일</th>
+                                <th style="width:15%">인계자</th>
+                                <th style="width:15%">인수자</th>
+                                <th>인계 업무</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${handovers.map(h => `
+                                <tr>
+                                    <td>${h.date}</td>
+                                    <td>${Utils.escapeHtml(h.from)}</td>
+                                    <td>${Utils.escapeHtml(h.to)}</td>
+                                    <td style="white-space:pre-wrap">${Utils.escapeHtml(h.content)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="signature-area">
+                        <table class="signature-box">
+                            <tr>
+                                <div>작성</div>
+                                <div>검토</div>
+                                <div>승인</div>
+                            </tr>
+                            <tr>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+                printArea.classList.remove('hidden');
+                window.print();
+                printArea.classList.add('hidden');
+            },
+
+            bindIssueEvents() {
+                document.getElementById('issueForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const data = DataStore.getData();
+                    
+                    const issue = {
+                        id: Utils.generateId(),
+                        title: document.getElementById('issueTitle').value.trim(),
+                        content: document.getElementById('issueContent').value.trim(),
+                        urgent: document.getElementById('issueUrgent').value === 'true',
+                        active: true,
+                        createdBy: Auth.currentUser.name,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    data.issues.push(issue);
+                    DataStore.saveData(data);
+                    this.navigate('issues');
+                    // 이슈 등록 시 즉시 푸시
+                    Notif.run(true);
+                });
+            },
+
+            closeIssue(id) {
+                const data = DataStore.getData();
+                const issue = data.issues.find(i => i.id === id);
+                if (issue) {
+                    issue.active = false;
+                    DataStore.saveData(data);
+                    this.navigate('issues');
+                }
+            },
+
+            reopenIssue(id) {
+                const data = DataStore.getData();
+                const issue = data.issues.find(i => i.id === id);
+                if (issue) {
+                    issue.active = true;
+                    DataStore.saveData(data);
+                    this.navigate('issues');
+                }
+            },
+
+            deleteIssue(id) {
+                if (!Components.confirm('정말 삭제하시겠습니까?')) return;
+                const data = DataStore.getData();
+                data.issues = data.issues.filter(i => i.id !== id);
+                DataStore.saveData(data);
+                this.navigate('issues');
+            },
+
+            renderAnalysisCharts() {
+                const data = DataStore.getData();
+                const members = DataStore.getMembers().filter(m => m.status === 'approved' && m.role !== 'admin');
+                const month = document.getElementById('analysisMonth')?.value || Utils.today().substring(0, 7);
+
+                const monthTasks = data.tasks.filter(t => 
+                    t.date.startsWith(month) && t.status === 'done'
+                );
+
+                const hoursData = [];
+                const countData = [];
+                const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+
+                members.forEach(m => {
+                    const myTasks = monthTasks.filter(t => 
+                        t.assignee === m.name || (!t.assignee && t.createdBy === m.name)
+                    );
+                    const hours = myTasks.reduce((sum, t) => sum + (t.duration || 0), 0);
+                    hoursData.push({ label: m.name, value: hours });
+                    countData.push({ label: m.name, value: myTasks.length });
+                });
+
+                setTimeout(() => {
+                    Charts.drawDonut('hoursChart', 'hoursLegend', hoursData, colors);
+                    Charts.drawDonut('countChart', 'countLegend', countData, colors);
+                }, 0);
+            },
+
+            bindAnalysisEvents() {
+                document.getElementById('analysisMonth')?.addEventListener('change', () => {
+                    this.navigate('analysis');
+                });
+            },
+
+            approveMember(id) {
+                const members = DataStore.getMembers();
+                const member = members.find(m => m.id === id);
+                if (member) {
+                    member.status = 'approved';
+                    DataStore.saveMembers(members);
+                    this.navigate('members');
+                }
+            },
+
+            rejectMember(id) {
+                const members = DataStore.getMembers();
+                const member = members.find(m => m.id === id);
+                if (member) {
+                    member.status = 'rejected';
+                    DataStore.saveMembers(members);
+                    this.navigate('members');
+                }
+            },
+
+            changeRole(id, newRole) {
+                if (!Auth.isAdmin()) return;
+                const members = DataStore.getMembers();
+                const member = members.find(m => m.id === id);
+                if (!member) return;
+                // 자기 자신 권한 변경 불가
+                if (id === Auth.currentUser.id) {
+                    Components.alert('자신의 권한은 변경할 수 없습니다.');
+                    this.navigate('members');
+                    return;
+                }
+                member.role = newRole;
+                DataStore.saveMembers(members);
+                // 변경된 회원이 현재 로그인 중인 경우 세션도 동기화
+                if (Auth.currentUser && Auth.currentUser.id === id) {
+                    Auth.currentUser.role = newRole;
+                    this._refreshAdminMenus();
+                }
+                this.navigate('members');
+            },
+
+            // 관리자 전용 메뉴 표시 상태 갱신
+            _refreshAdminMenus() {
+                const isAdmin = Auth.isAdmin();
+                document.querySelectorAll('.admin-only').forEach(el => {
+                    el.classList.toggle('hidden', !isAdmin);
+                });
+                document.getElementById('userInfo').textContent =
+                    `${Auth.currentUser.name} (${isAdmin ? '관리자' : '직원'})`;
+            },
+
+            deleteMember(id) {
+                if (!Components.confirm('정말 삭제하시겠습니까?')) return;
+                let members = DataStore.getMembers();
+                members = members.filter(m => m.id !== id);
+                DataStore.saveMembers(members);
+                this.navigate('members');
+            },
+
+            // 대시보드 달력: 휴가자 이름 클릭 → 본인이면 작성 가능, 타인이면 조회만
+            showHandoverModal(name, date) {
+                const data = DataStore.getData();
+                const allByPerson = data.handovers.filter(h => h.from === name).sort((a,b) => b.date.localeCompare(a.date));
+                const isSelf = Auth.currentUser.name === name || Auth.isAdmin();
+
+                let content = `<p style="margin-bottom:.75rem;color:var(--gray-600);font-size:.9rem">
+                    <strong>${Utils.escapeHtml(name)}</strong> · 인수인계 내역
+                    ${isSelf ? '' : '<span style="background:#fff3e0;color:#e65100;font-size:.75rem;padding:2px 8px;border-radius:999px;margin-left:6px">👁 조회만 가능</span>'}
+                </p>`;
+
+                if (allByPerson.length === 0) {
+                    content += `<p style="color:#999;text-align:center;padding:1rem">등록된 인수인계가 없습니다.</p>`;
+                    if (isSelf) {
+                        content += `<button class="btn btn-primary btn-sm" onclick="App.goToHandoverWithDate('${date}');document.querySelector('.modal-backdrop')?.remove()">
+                            + 인수인계 작성하기
+                        </button>`;
+                    }
+                } else {
+                    content += allByPerson.slice(0, 10).map(h => `
+                        <div class="handover-modal-item">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                                <strong>${h.date}</strong>
+                                <span style="color:var(--gray-600);font-size:.8rem">→ ${Utils.escapeHtml(h.to)}</span>
+                            </div>
+                            <div style="white-space:pre-wrap">${Utils.escapeHtml(h.content)}</div>
+                        </div>
+                    `).join('');
+                    if (isSelf) {
+                        content += `<div style="margin-top:.75rem">
+                            <button class="btn btn-primary btn-sm" onclick="App.goToHandoverWithDate('${date}');document.querySelector('.modal-backdrop')?.remove()">
+                                + 인수인계 추가 작성
+                            </button>
+                        </div>`;
+                    }
+                }
+
+                Components.showModal(`📋 ${Utils.escapeHtml(name)} 인수인계`, content);
+            },
+
+            // 휴가 일정 날짜 클릭 → 인수인계 페이지로 이동 + 날짜 자동 입력
+            goToHandoverWithDate(date) {
+                this.navigate('handover');
+                setTimeout(() => {
+                    const dateInput = document.getElementById('handoverDate');
+                    if (dateInput) dateInput.value = date;
+                }, 50);
+            }
+        };
+
+        // 앱 시작
+        document.addEventListener('DOMContentLoaded', () => App.init());
+
+        // ==================== PWA ====================
+        // 서비스 워커 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/tjeorb/sw.js')
+                    .catch(err => console.warn('SW 등록 실패:', err));
             });
-            const weekDay = day.getDay();
-            const holidayName = Utils.isHoliday(ymd);
-            const vacationButtons = dayVac.map(v => {
-              const displayName = Utils.escapeHtml(nameMap[v.userId]?.id || v.userId);
-              return `<button type="button" class="vac-chip ${VACATION_CLASS[v.type] || 'vac-annual'}" data-action="open-handover-date" data-value="${ymd}" title="${displayName} 인수인계 보기" style="cursor:pointer; border:0; width:100%; text-align:left;">${displayName}</button>`;
-            }).join('');
-            return `<div class="calendar-day"><div class="calendar-day-num ${holidayName ? 'sun' : weekDay === 0 ? 'sun' : weekDay === 6 ? 'sat' : ''}">${day.getDate()}</div>${holidayName ? `<div class="holiday-label">${holidayName}</div>` : ''}${vacationButtons || '<div class="muted" style="font-size:11px;">&nbsp;</div>'}</div>`;
-          }).join('')}</div><div class="notice">휴가 달력의 이름을 클릭하면 해당 날짜의 인수인계 화면으로 이동합니다.</div>`;
-        },
-        renderIssueSummary(user) {
-          const items = Utils.clone(Store.state.issues).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
-          return `<div class="panel-header"><h3 class="panel-title">이슈사항</h3>${user.role === 'admin' ? '<button class="btn small" data-action="nav" data-value="issues">상세 보기</button>' : ''}</div>${items.length ? items.map(item => `<div class="issue-item"><div><strong>${Utils.escapeHtml(item.title)}</strong></div><div class="task-meta">${new Date(item.createdAt).toLocaleString('ko-KR')}</div><div>${Utils.escapeHtml(item.content)}</div></div>`).join('') : '<div class="muted">등록된 이슈가 없습니다.</div>'}`;
-        },
-        renderTaskForm(user) {
-          const editingId = Store.state.ui.editingTaskId;
-          const task = editingId ? Store.state.tasks.find(t => t.id === editingId) : null;
-          const approvedUsers = Selectors.approvedUsers().filter(u => u.role !== 'admin');
-          const canDelete = task ? Permissions.canDeleteTask(task, user) : false;
-          const nameMap = Selectors.userNameMap();
-          const allVisibleTasks = Store.state.tasks.filter(t => user.role === 'admin' ? true : (t.authorId === user.id || t.assigneeId === user.id)).sort((a, b) => String(b.date).localeCompare(String(a.date)));
-          const assigneeOptions = Array.from(new Set(allVisibleTasks.map(t => t.assigneeId))).filter(Boolean);
-          const dateOptions = Array.from(new Set(allVisibleTasks.map(t => t.date))).filter(Boolean).sort((a, b) => String(b).localeCompare(String(a)));
-          const assigneeFilter = user.role === 'admin' ? (Store.state.ui.taskFilterAssignee || '') : '';
-          const dateFilter = user.role === 'admin' ? (Store.state.ui.taskFilterDate || '') : '';
-          const myTasks = allVisibleTasks.filter(t => user.role !== 'admin' ? true : ((!assigneeFilter || t.assigneeId === assigneeFilter) && (!dateFilter || t.date === dateFilter)));
-          return `<div class="grid-2"><section class="panel"><div class="panel-header"><h3 class="panel-title">업무작성</h3></div><form data-form="task" class="form-grid"><div class="field"><label>날짜</label><input type="date" name="date" value="${task ? task.date : Store.state.ui.selectedDate}" required /></div><div class="field"><label>진행상태</label><select name="status">${['진행', '완료'].map(v => `<option ${task?.status === v ? 'selected' : ''}>${v}</option>`).join('')}</select></div><div class="field"><label>중요도</label><select name="priority">${['상', '중', '하'].map(v => `<option ${task?.priority === v ? 'selected' : ''}>${v}</option>`).join('')}</select></div><div class="field"><label>소요시간</label><input type="number" min="0" step="0.5" name="hours" value="${task ? task.hours : 0}" required /></div>${user.role === 'admin' ? `<div class="field full"><label>직원 지정</label><select name="assigneeId">${approvedUsers.map(u => `<option value="${u.id}" ${task?.assigneeId === u.id ? 'selected' : ''}>${Utils.escapeHtml(u.id)} / ${Utils.escapeHtml(u.dept)}</option>`).join('')}</select></div>` : ''}<div class="field full"><label>업무내용</label><textarea name="content" required>${task ? task.content : ''}</textarea></div><div class="field full" style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn primary" type="submit">${editingId ? '업무 수정 저장' : '업무 저장'}</button>${editingId && canDelete ? `<button type="button" class="btn danger" data-action="delete-task" data-value="${editingId}">업무 삭제</button>` : ''}</div></form></section><section class="panel"><div class="panel-header"><h3 class="panel-title">${user.role === 'admin' ? '등록 업무 목록' : '내 작성/담당 업무'}</h3></div>${user.role === 'admin' ? `<div class="form-grid" style="margin-bottom:12px;"><div class="field"><label>담당자 필터</label><select data-role="task-filter-assignee"><option value="">전체</option>${assigneeOptions.map(id => `<option value="${id}" ${assigneeFilter === id ? 'selected' : ''}>${Utils.escapeHtml(nameMap[id]?.id || id)}</option>`).join('')}</select></div><div class="field"><label>일자 필터</label><select data-role="task-filter-date"><option value="">전체</option>${dateOptions.map(date => `<option value="${date}" ${dateFilter === date ? 'selected' : ''}>${date}</option>`).join('')}</select></div><div class="field full"><button class="btn" type="button" data-action="reset-task-filters">필터 초기화</button></div></div>` : ''}${myTasks.length ? myTasks.map(item => `<div class="task-item"><div><strong>${item.date}</strong></div><div>${Utils.escapeHtml(item.content)}</div><div class="task-meta">작성자: ${Utils.escapeHtml(nameMap[item.authorId]?.id || item.authorId)} / 담당자: ${Utils.escapeHtml(nameMap[item.assigneeId]?.id || item.assigneeId)} / 상태: ${item.status} / 중요도: ${item.priority} / ${item.hours}시간</div><div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">${Permissions.canEditTask(item, user) ? `<button class="btn small" type="button" data-action="open-task-edit" data-value="${item.id}">수정</button>` : ''}${Permissions.canDeleteTask(item, user) ? `<button class="btn danger small" type="button" data-action="delete-task" data-value="${item.id}">삭제</button>` : ''}</div></div>`).join('') : '<div class="muted">조건에 맞는 업무가 없습니다.</div>'}</section></div>`;
-        },
-        renderVacationView(user) {
-          const editingId = Store.state.ui.editingVacationId;
-          const editingVacation = editingId ? Store.state.vacations.find(v => v.id === editingId) : null;
-          const myVacations = Store.state.vacations.filter(v => user.role === 'admin' || v.userId === user.id).sort((a, b) => Utils.sortByDateAsc(a.startDate, b.startDate));
-          const nameMap = Selectors.userNameMap();
-          return `<div class="grid-2"><section class="panel"><div class="panel-header"><h3 class="panel-title">휴가계획 작성</h3></div><form data-form="vacation" class="form-grid"><div class="field"><label>종류</label><select name="type" data-role="vacation-type">${['반반차', '반차', '연차', '경조사'].map(v => `<option ${editingVacation?.type === v ? 'selected' : ''}>${v}</option>`).join('')}</select></div><div class="field"><label>시작일</label><input type="date" name="startDate" value="${editingVacation?.startDate || ''}" required /></div><div class="field" data-role="vacation-end-field" style="display:${editingVacation && (editingVacation.type === '연차' || editingVacation.type === '경조사') ? 'flex' : 'none'};"><label>종료일</label><input type="date" name="endDate" value="${editingVacation?.endDate || ''}" /></div><div class="field full"><label>사유</label><textarea name="reason" required>${editingVacation?.reason || ''}</textarea></div><div class="field full" style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn primary" type="submit">${editingVacation ? '휴가 수정 저장' : '휴가 저장'}</button>${editingVacation ? `<button class="btn danger" type="button" data-action="delete-vacation" data-value="${editingVacation.id}">휴가 삭제</button>` : ''}</div></form><div class="notice">종료일은 연차와 경조사 선택 시에만 입력할 수 있습니다.</div></section><section class="panel"><div class="panel-header"><h3 class="panel-title">${user.role === 'admin' ? '전체 휴가계획' : '내 휴가계획'}</h3></div>${myVacations.length ? myVacations.map(v => `<div class="vacation-item"><button type="button" data-action="open-handover-date" data-value="${v.startDate}" style="border:0; background:transparent; padding:0; cursor:pointer; text-align:left; font:inherit; width:100%;"><div><strong>${Utils.escapeHtml(nameMap[v.userId]?.id || v.userId)}</strong> / ${Utils.escapeHtml(v.type)} / ${v.startDate}${v.endDate && v.endDate !== v.startDate ? ` ~ ${v.endDate}` : ''}</div><div>${Utils.escapeHtml(v.reason || '')}</div><div class="task-meta">클릭 시 ${v.startDate} 인수인계로 이동</div></button><div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;"><button class="btn small" type="button" data-action="edit-vacation" data-value="${v.id}">수정</button><button class="btn danger small" type="button" data-action="delete-vacation" data-value="${v.id}">삭제</button></div></div>`).join('') : '<div class="muted">등록된 휴가가 없습니다.</div>'}</section></div>`;
-        },
-        renderHandoverView(user) {
-          const currentUser = Selectors.currentUser();
-          const rawGrouped = Selectors.handoversByDate();
-          const grouped = Object.fromEntries(Object.entries(rawGrouped).map(([date, items]) => [
-            date,
-            currentUser.role === 'admin' ? items : items.filter(i => i.userId === currentUser.id)
-          ]).filter(([_, items]) => items.length > 0));
-          const selectedDate = Store.state.ui.selectedDate;
-          const allDates = Object.keys(grouped).sort(Utils.sortByDateAsc);
-          const dates = selectedDate ? allDates.filter(date => date === selectedDate) : allDates;
-          const nameMap = Selectors.userNameMap();
-          const editingId = Store.state.ui.editingHandoverId;
-          const editingHandover = editingId ? Store.state.handovers.find(h => h.id === editingId) : null;
-          return `<div class="grid-2"><section class="panel screen-only"><div class="panel-header"><h3 class="panel-title">인수인계 작성</h3></div><form data-form="handover" class="form-grid"><div class="field"><label>날짜</label><input type="date" name="date" value="${editingHandover?.date || selectedDate || ''}" required /></div><div class="field"><label>인수받는 직원명</label><input name="receiverName" value="${Utils.escapeHtml(editingHandover?.receiverName || '')}" required /></div><div class="field full"><label>인수인계사항</label><textarea name="content" required>${editingHandover?.content || ''}</textarea></div><div class="field full" style="display:flex; gap:8px; flex-wrap:wrap;"><button class="btn primary" type="submit">${editingHandover ? '인수인계 수정 저장' : '저장'}</button>${editingHandover ? `<button class="btn danger" type="button" data-action="delete-handover" data-value="${editingHandover.id}">인수인계 삭제</button>` : ''}</div></form></section><section class="panel"><div class="print-only" style="margin-bottom:12px; text-align:center;"><h2 style="margin:0 0 8px;">인수인계 출력물</h2><div>${selectedDate ? Utils.formatDate(selectedDate) : '전체 날짜'}</div></div><div class="panel-header screen-only"><h3 class="panel-title">날짜별 인수인계${selectedDate ? ` - ${Utils.formatDate(selectedDate)}` : ''}</h3><div>${selectedDate ? '<button class="btn small" data-action="show-all-handover">전체 보기</button>' : ''}<button class="btn warning" data-action="print-handover">인쇄</button></div></div>${dates.length ? dates.map(date => `<div class="handover-item"><div class="print-approval-box"><div class="print-approval-title">결재란</div><table class="print-approval-table"><tr><th>결재</th><th>검토</th><th>승인</th></tr><tr><td></td><td></td><td></td></tr></table></div><div><strong>${Utils.formatDate(date)}</strong></div><table class="handover-table"><thead><tr><th class="handover-check-col">선택</th><th>인수인계사항</th><th class="handover-receiver-col">인수자</th><th class="handover-action-col screen-only">수정/삭제</th></tr></thead><tbody>${grouped[date].map(item => `<tr><td class="handover-check-col"><input type="checkbox" /></td><td class="handover-content-cell"><div>${Utils.escapeHtml(item.content)}</div><div class="task-meta">작성자: ${Utils.escapeHtml(nameMap[item.userId]?.id || item.userId)}</div></td><td>${Utils.escapeHtml(item.receiverName || '-')}</td><td class="handover-action-col screen-only"><div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;"><button class="btn small" type="button" data-action="edit-handover" data-value="${item.id}">수정</button><button class="btn danger small" type="button" data-action="delete-handover" data-value="${item.id}">삭제</button></div></td></tr>`).join('')}</tbody></table></div>`).join('') : '<div class="muted">해당 날짜 인수인계가 없습니다.</div>'}<div class="notice screen-only">휴가 달력에서 날짜를 누르면 같은 날짜 인수인계만 바로 확인할 수 있습니다. 인쇄 시에는 결재란이 실제로 출력됩니다.</div></section></div>`;
-        },
-        renderIssueView(user) {
-          if (user.role !== 'admin') return '<section class="panel"><div class="muted">접근 권한이 없습니다.</div></section>';
-          const items = Utils.clone(Store.state.issues).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-          return `<div class="grid-2"><section class="panel"><div class="panel-header"><h3 class="panel-title">이슈사항 목록</h3></div>${items.length ? items.map(item => `<div class="issue-item"><div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;"><div><div><strong>${Utils.escapeHtml(item.title)}</strong></div><div class="task-meta">${new Date(item.createdAt).toLocaleString('ko-KR')}</div><div>${Utils.escapeHtml(item.content)}</div></div><button class="btn danger small" data-action="delete-issue" data-value="${item.id}">삭제</button></div></div>`).join('') : '<div class="muted">등록된 이슈가 없습니다.</div>'}</section><section class="panel"><div class="panel-header"><h3 class="panel-title">이슈사항 작성</h3></div><form data-form="issue" class="form-grid"><div class="field full"><label>제목</label><input name="title" required /></div><div class="field full"><label>내용</label><textarea name="content" required></textarea></div><div class="field full"><button class="btn primary" type="submit">이슈 저장</button></div></form></section></div>`;
-        },
-        renderAnalysisView() {
-          const month = Store.state.ui.analysisMonth;
-          const completed = Selectors.completedTasksByMonth(month);
-          const staffUsers = Selectors.approvedUsers().filter(u => u.role !== 'admin');
-          const summaries = staffUsers.map(user => {
-            const tasks = completed.filter(t => t.assigneeId === user.id);
-            const priorityCounts = { high: tasks.filter(t => t.priority === '상').length, mid: tasks.filter(t => t.priority === '중').length, low: tasks.filter(t => t.priority === '하').length };
-            return { user, tasks, priorityCounts, hoursTotal: tasks.reduce((sum, t) => sum + Number(t.hours || 0), 0) };
-          });
-          return `<section class="panel"><div class="panel-header"><h3 class="panel-title">업무분석</h3><div><input type="month" data-role="analysis-month" value="${month}" /></div></div><div class="cards-row"><div class="stat-card"><h4>분석월</h4><div class="stat-big">${month}</div></div><div class="stat-card"><h4>완료업무 수</h4><div class="stat-big">${completed.length}</div></div><div class="stat-card"><h4>분석 대상 직원</h4><div class="stat-big">${staffUsers.length}</div></div></div></section>${summaries.map((summary, idx) => `<section class="panel"><div class="panel-header"><h3 class="panel-title">${Utils.escapeHtml(summary.user.id)} 분석</h3><button class="btn small success" type="button" data-action="export-analysis-excel" data-value="${summary.user.id}">엑셀 내보내기</button></div><div class="canvas-wrap"><div><table><thead><tr><th>날짜</th><th>업무내용</th><th>중요도</th><th>소요시간</th></tr></thead><tbody>${summary.tasks.length ? summary.tasks.map(task => `<tr><td>${task.date}</td><td style="text-align:left">${Utils.escapeHtml(task.content)}</td><td>${task.priority}</td><td>${task.hours}</td></tr>`).join('') : '<tr><td colspan="4">완료된 업무가 없습니다.</td></tr>'}</tbody></table><div class="cards-row" style="margin-top:12px;"><div class="stat-card"><h4>중요도 상</h4><div class="stat-big">${summary.priorityCounts.high}</div></div><div class="stat-card"><h4>중요도 중</h4><div class="stat-big">${summary.priorityCounts.mid}</div></div><div class="stat-card"><h4>중요도 하</h4><div class="stat-big">${summary.priorityCounts.low}</div></div><div class="stat-card"><h4>소요시간 합계</h4><div class="stat-big">${summary.hoursTotal}</div></div></div></div><div><canvas id="chart_${idx}" width="360" height="360" data-high="${summary.priorityCounts.high}" data-mid="${summary.priorityCounts.mid}" data-low="${summary.priorityCounts.low}" data-name="${Utils.escapeHtml(summary.user.id)}"></canvas></div></div></section>`).join('')}`;
         }
-      };
 
-      const Charts = {
-        renderAnalysisCharts() {
-          document.querySelectorAll('canvas[id^="chart_"]').forEach((canvas) => {
-            const high = Number(canvas.dataset.high || 0);
-            const mid = Number(canvas.dataset.mid || 0);
-            const low = Number(canvas.dataset.low || 0);
-            const name = canvas.dataset.name || '';
-            Charts.drawPie(canvas, [high, mid, low], ['상', '중', '하'], `${name} 중요도 분포`);
-          });
-        },
-        drawPie(canvas, values, labels, title) {
-          if (!canvas || typeof canvas.getContext !== 'function') return;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) return;
-          const actualTotal = values.reduce((a, b) => a + b, 0);
-          const total = actualTotal || 1;
-          const cx = canvas.width / 2;
-          const cy = canvas.height / 2;
-          const radius = 110;
-          const colors = ['#ef4444', '#f59e0b', '#2563eb'];
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.font = '14px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillStyle = '#111827';
-          ctx.fillText(title, cx, 28);
-          let start = -Math.PI / 2;
-          values.forEach((val, i) => {
-            const slice = (val / total) * Math.PI * 2;
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, radius, start, start + slice);
-            ctx.closePath();
-            ctx.fillStyle = colors[i % colors.length];
-            ctx.fill();
-            start += slice;
-          });
-          if (actualTotal === 0) {
-            ctx.beginPath();
-            ctx.fillStyle = '#e5e7eb';
-            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          ctx.fillStyle = '#111827';
-          ctx.font = 'bold 18px Arial';
-          ctx.fillText(String(actualTotal), cx, cy + 6);
-          ctx.font = '13px Arial';
-          ctx.textAlign = 'left';
-          labels.forEach((label, i) => {
-            const y = 280 + i * 24;
-            ctx.fillStyle = colors[i % colors.length];
-            ctx.fillRect(40, y - 10, 12, 12);
-            ctx.fillStyle = '#111827';
-            ctx.fillText(`${label}: ${values[i]}건`, 60, y);
-          });
-        }
-      };
+        // 앱 설치 프롬프트 처리
+        let _pwaPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            _pwaPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.classList.remove('hidden');
+        });
 
-      const Tests = {
-        run() {
-          try {
-            console.assert(Utils.isFourDigitNumber('1234') === true, '4자리 숫자 검증 실패');
-            console.assert(Utils.isFourDigitNumber('12a4') === false, '숫자 외 문자 검증 실패');
-            console.assert(Utils.isHoliday('2026-12-25') === '성탄절', '공휴일 매핑 실패');
-            console.assert(typeof Actions.exportAnalysisExcel === 'function', '엑셀 내보내기 함수 없음');
-            console.assert(typeof App.renderTaskForm === 'function', '업무작성 렌더 함수 없음');
-            console.assert(typeof App.renderVacationCalendar === 'function', '휴가 달력 렌더 함수 없음');
-            console.assert(typeof App.renderHandoverView === 'function', '인수인계 렌더 함수 없음');
-            console.assert(typeof Charts.drawPie === 'function', 'drawPie 함수 없음');
-            console.assert(['결재', '검토', '승인'].length === 3, '이전 결재란 헤더 테스트 실패');
-            console.assert(/[",\n]/.test('a,b') === true, 'CSV 정규식 테스트 실패');
-            console.assert('x\ny'.split('\n').length === 2, '줄바꿈 처리 테스트 실패');
-          } catch (err) {
-            console.error('Self test failed:', err);
-          }
-        }
-      };
+        document.getElementById('pwaInstallBtn')?.addEventListener('click', async () => {
+            if (!_pwaPrompt) return;
+            _pwaPrompt.prompt();
+            const { outcome } = await _pwaPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('pwaInstallBtn')?.classList.add('hidden');
+                _pwaPrompt = null;
+            }
+        });
 
-      App.init();
-      Tests.run();
-    })();
-  </script>
+        // 설치 완료 시 버튼 숨기기
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('pwaInstallBtn')?.classList.add('hidden');
+            _pwaPrompt = null;
+        });
+    </script>
 </body>
 </html>
