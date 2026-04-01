@@ -925,6 +925,8 @@
                 <h1 class="header-title">📊 근무현황 대시보드</h1>
                 <div class="header-user">
                     <span id="userInfo"></span>
+                    <!-- Sheets 새로고침 버튼 -->
+                    <button id="syncBtn" onclick="DataStore.refresh()" style="display:none;background:none;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px;color:#555" title="Google Sheets에서 최신 데이터 불러오기">🔄 새로고침</button>
                     <!-- 앱 설치 버튼 (PWA) -->
                     <button id="pwaInstallBtn" class="btn btn-primary btn-sm hidden" title="앱으로 설치">📲 앱 설치</button>
                     <!-- 알림 벨 -->
@@ -1232,13 +1234,34 @@
             }
         };
 
-        // ==================== 데이터 관리 ====================
+        // ==================== 데이터 관리 (Google Sheets 연동) ====================
+        const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwyP9LjBTQqE-eusKgQHnF7k0g5DxxySmEpdAIqS7OlNZ1ft2SDilcy07_BVgwhq-qU/exec';
+
+        // 로컬 캐시 (Sheets에서 불러온 데이터를 메모리에 보관)
+        let _cache = {
+            members: null,
+            tasks: [], vacations: [], handovers: [], issues: []
+        };
+        let _syncing = false; // 동기화 중 표시
+
+        // Sheets GET 요청
+        async function sheetsGet(action, sheet) {
+            const url = SHEETS_URL + '?action=' + action + (sheet ? '&sheet=' + sheet : '');
+            const res = await fetch(url);
+            return await res.json();
+        }
+
+        // Sheets POST 요청
+        async function sheetsPost(body) {
+            const res = await fetch(SHEETS_URL, {
+                method: 'POST',
+                body: JSON.stringify(body)
+            });
+            return await res.json();
+        }
+
         const DataStore = {
-            KEYS: {
-                MEMBERS: 'dashboard_members_v2',
-                DATA: 'dashboard_data_v2',
-                SESSION: 'dashboard_session'
-            },
+            KEYS: { SESSION: 'dashboard_session' },
 
             defaultAdmin: {
                 id: 'admin_default',
@@ -1249,68 +1272,121 @@
                 createdAt: new Date().toISOString()
             },
 
-            init() {
-                // 기본 관리자 생성
-                let members = this.getMembers();
-                if (!members.find(m => m.name === '관리자')) {
-                    members.push(this.defaultAdmin);
-                    this.saveMembers(members);
-                }
-
-                // 기본 데이터 구조
-                if (!localStorage.getItem(this.KEYS.DATA)) {
-                    this.saveData({
-                        tasks: [],
-                        vacations: [],
-                        handovers: [],
-                        issues: []
-                    });
-                }
-            },
-
-            getMembers() {
+            // 앱 시작 시 전체 데이터 로드
+            async init() {
+                this.showLoading(true);
                 try {
-                    return JSON.parse(localStorage.getItem(this.KEYS.MEMBERS)) || [];
-                } catch {
-                    return [];
+                    const all = await sheetsGet('getAll');
+                    _cache.members   = Array.isArray(all.members)   ? all.members   : [];
+                    _cache.tasks     = Array.isArray(all.tasks)      ? all.tasks     : [];
+                    _cache.vacations = Array.isArray(all.vacations)  ? all.vacations : [];
+                    _cache.handovers = Array.isArray(all.handovers)  ? all.handovers : [];
+                    _cache.issues    = Array.isArray(all.issues)     ? all.issues    : [];
+
+                    // 기본 관리자 없으면 생성
+                    if (!_cache.members.find(m => m.name === '관리자')) {
+                        await sheetsPost({ action:'save', sheet:'members', data: this.defaultAdmin });
+                        _cache.members.push(this.defaultAdmin);
+                    }
+                } catch(e) {
+                    console.error('Sheets 연결 실패, 로컬 캐시 사용:', e);
+                    _cache.members   = JSON.parse(localStorage.getItem('_members') || '[]');
+                    _cache.tasks     = JSON.parse(localStorage.getItem('_tasks')   || '[]');
+                    _cache.vacations = JSON.parse(localStorage.getItem('_vacs')    || '[]');
+                    _cache.handovers = JSON.parse(localStorage.getItem('_hands')   || '[]');
+                    _cache.issues    = JSON.parse(localStorage.getItem('_issues')  || '[]');
+                    if (!_cache.members.find(m => m.name === '관리자')) {
+                        _cache.members.push(this.defaultAdmin);
+                    }
+                }
+                this.showLoading(false);
+            },
+
+            showLoading(show) {
+                let el = document.getElementById('_loadingOverlay');
+                if (show) {
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.id = '_loadingOverlay';
+                        el.innerHTML = '<div style="text-align:center"><div style="font-size:32px;margin-bottom:12px">📊</div><div style="font-size:15px;color:#555">Google Sheets에서 데이터를 불러오는 중...</div></div>';
+                        el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;z-index:9999;';
+                        document.body.appendChild(el);
+                    }
+                } else {
+                    if (el) el.remove();
                 }
             },
+
+            // ── 회원 관련 ──
+            getMembers() { return _cache.members || []; },
 
             saveMembers(members) {
-                localStorage.setItem(this.KEYS.MEMBERS, JSON.stringify(members));
+                _cache.members = members;
+                localStorage.setItem('_members', JSON.stringify(members));
+                // 변경된 회원만 Sheets에 반영 (전체 덮어쓰기)
+                sheetsPost({ action:'saveAll', data:{ members } }).catch(()=>{});
             },
 
+            // ── 업무 데이터 관련 ──
             getData() {
-                try {
-                    return JSON.parse(localStorage.getItem(this.KEYS.DATA)) || {
-                        tasks: [],
-                        vacations: [],
-                        handovers: [],
-                        issues: []
-                    };
-                } catch {
-                    return { tasks: [], vacations: [], handovers: [], issues: [] };
-                }
+                return {
+                    tasks:     _cache.tasks     || [],
+                    vacations: _cache.vacations || [],
+                    handovers: _cache.handovers || [],
+                    issues:    _cache.issues    || []
+                };
             },
 
             saveData(data) {
-                localStorage.setItem(this.KEYS.DATA, JSON.stringify(data));
+                // 캐시 업데이트
+                if (data.tasks     !== undefined) _cache.tasks     = data.tasks;
+                if (data.vacations !== undefined) _cache.vacations = data.vacations;
+                if (data.handovers !== undefined) _cache.handovers = data.handovers;
+                if (data.issues    !== undefined) _cache.issues    = data.issues;
+
+                // 로컬 백업
+                localStorage.setItem('_tasks',  JSON.stringify(_cache.tasks));
+                localStorage.setItem('_vacs',   JSON.stringify(_cache.vacations));
+                localStorage.setItem('_hands',  JSON.stringify(_cache.handovers));
+                localStorage.setItem('_issues', JSON.stringify(_cache.issues));
+
+                // Sheets 전체 동기화 (비동기, 실패해도 계속)
+                sheetsPost({
+                    action: 'saveAll',
+                    data: {
+                        tasks:     _cache.tasks,
+                        vacations: _cache.vacations,
+                        handovers: _cache.handovers,
+                        issues:    _cache.issues
+                    }
+                }).catch(()=>{});
             },
 
+            // ── 세션 관련 ──
             getSession() {
-                try {
-                    return JSON.parse(sessionStorage.getItem(this.KEYS.SESSION));
-                } catch {
-                    return null;
-                }
+                try { return JSON.parse(sessionStorage.getItem(this.KEYS.SESSION)); }
+                catch { return null; }
             },
-
             setSession(user) {
                 sessionStorage.setItem(this.KEYS.SESSION, JSON.stringify(user));
             },
-
             clearSession() {
                 sessionStorage.removeItem(this.KEYS.SESSION);
+            },
+
+            // ── 수동 새로고침 (Sheets에서 최신 데이터 다시 로드) ──
+            async refresh() {
+                this.showLoading(true);
+                try {
+                    const all = await sheetsGet('getAll');
+                    _cache.members   = Array.isArray(all.members)   ? all.members   : _cache.members;
+                    _cache.tasks     = Array.isArray(all.tasks)      ? all.tasks     : _cache.tasks;
+                    _cache.vacations = Array.isArray(all.vacations)  ? all.vacations : _cache.vacations;
+                    _cache.handovers = Array.isArray(all.handovers)  ? all.handovers : _cache.handovers;
+                    _cache.issues    = Array.isArray(all.issues)     ? all.issues    : _cache.issues;
+                } catch(e) { console.error('새로고침 실패:', e); }
+                this.showLoading(false);
+                App.navigate(App.currentPage);
             }
         };
 
@@ -2370,9 +2446,9 @@
                 this.navigate('dashboard');
             },
 
-            init() {
-                DataStore.init();
-                
+            async init() {
+                await DataStore.init();
+
                 if (Auth.init()) {
                     this.showApp();
                 } else {
@@ -2385,12 +2461,14 @@
             showAuth() {
                 document.getElementById('authScreen').classList.remove('hidden');
                 document.getElementById('appScreen').classList.add('hidden');
+                document.getElementById('syncBtn').style.display = 'none';
             },
 
             showApp() {
                 document.getElementById('authScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 this._weekOffset = 0;
+                document.getElementById('syncBtn').style.display = 'inline-block';
                 
                 // 관리자 메뉴 표시
                 document.querySelectorAll('.admin-only').forEach(el => {
