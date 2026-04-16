@@ -1627,7 +1627,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${data.handovers.sort((a, b) => b.date.localeCompare(a.date)).map(h => `
+                                    ${data.handovers.sort((a, b) => b.date.localeCompare(a.date)).map(h => {
+                                        const isOwner = Auth.isAdmin() || h.from === Auth.currentUser.name;
+                                        return `
                                         <tr>
                                             <td><input type="checkbox" class="handover-check" value="${h.id}"></td>
                                             <td>${Utils.formatDateKr(h.date)}</td>
@@ -1635,10 +1637,14 @@
                                             <td>${Utils.escapeHtml(h.to)}</td>
                                             <td>${Utils.escapeHtml(h.content.substring(0, 50))}${h.content.length > 50 ? '...' : ''}</td>
                                             <td>
-                                                <button class="btn btn-danger btn-sm" onclick="App.deleteHandover('${h.id}')">삭제</button>
+                                                ${isOwner ? `
+                                                <div class="btn-group">
+                                                    <button class="btn btn-secondary btn-sm" onclick="App.editHandover('${h.id}')">수정</button>
+                                                    <button class="btn btn-danger btn-sm" onclick="App.deleteHandover('${h.id}')">삭제</button>
+                                                </div>` : '-'}
                                             </td>
-                                        </tr>
-                                    `).join('')}
+                                        </tr>`;
+                                    }).join('')}
                                 </tbody>
                             </table>
                         </div>
@@ -2285,6 +2291,62 @@
                         cb.checked = e.target.checked;
                     });
                 });
+            },
+
+            editHandover(id) {
+                const data = DataStore.getData();
+                const h = data.handovers.find(h => h.id === id);
+                if (!h) return;
+                if (!Auth.isAdmin() && h.from !== Auth.currentUser.name) {
+                    Components.alert('본인의 인수인계만 수정할 수 있습니다.'); return;
+                }
+
+                const members = DataStore.getMembers().filter(m => m.status === 'approved');
+                const toOptions = members.map(m =>
+                    `<option value="${Utils.escapeHtml(m.name)}" ${m.name === h.to ? 'selected' : ''}>${Utils.escapeHtml(m.name)}</option>`
+                ).join('');
+
+                const modal = Components.showModal('📝 인수인계 수정', `
+                    <div class="form-group">
+                        <label>인계일</label>
+                        <input type="date" id="editHandoverDate" class="form-control" value="${h.date ? h.date.substring(0,10) : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>인수자</label>
+                        <select id="editHandoverTo" class="form-control">${toOptions}</select>
+                    </div>
+                    <div class="form-group">
+                        <label>인계 업무</label>
+                        <textarea id="editHandoverContent" class="form-control" rows="6" style="resize:vertical">${Utils.escapeHtml(h.content)}</textarea>
+                    </div>
+                    <p id="editHandoverError" class="text-danger hidden"></p>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="App.saveHandoverEdit('${id}')">저장</button>
+                        <button class="btn btn-secondary" onclick="document.querySelector('.modal-backdrop')?.remove()">취소</button>
+                    </div>
+                `);
+            },
+
+            saveHandoverEdit(id) {
+                const data = DataStore.getData();
+                const h = data.handovers.find(h => h.id === id);
+                if (!h) return;
+
+                const date = document.getElementById('editHandoverDate').value;
+                const to = document.getElementById('editHandoverTo').value;
+                const content = document.getElementById('editHandoverContent').value.trim();
+
+                if (!date) { document.getElementById('editHandoverError').textContent = '인계일을 입력하세요.'; document.getElementById('editHandoverError').classList.remove('hidden'); return; }
+                if (!content) { document.getElementById('editHandoverError').textContent = '내용을 입력하세요.'; document.getElementById('editHandoverError').classList.remove('hidden'); return; }
+
+                h.date = date;
+                h.to = to;
+                h.content = content;
+                h.updatedAt = new Date().toISOString();
+
+                DataStore.saveData(data);
+                document.querySelector('.modal-backdrop')?.remove();
+                this.navigate('handover');
             },
 
             deleteHandover(id) {
