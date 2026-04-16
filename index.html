@@ -1668,26 +1668,36 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${data.handovers.sort((a, b) => b.date.localeCompare(a.date)).map(h => {
-                                        const hFrom = String(h.from || '').trim();
+                                    ${(() => {
                                         const myName = String(Auth.currentUser.name || '').trim();
-                                        const isOwner = Auth.isAdmin() || hFrom === myName;
-                                        return `
-                                        <tr>
-                                            <td><input type="checkbox" class="handover-check" value="${h.id}"></td>
-                                            <td>${Utils.formatDateKr(h.date)}</td>
-                                            <td>${Utils.escapeHtml(h.from)}</td>
-                                            <td>${Utils.escapeHtml(h.to)}</td>
-                                            <td>${Utils.escapeHtml(h.content.substring(0, 50))}${h.content.length > 50 ? '...' : ''}</td>
-                                            <td>
-                                                ${isOwner ? `
-                                                <div class="btn-group">
-                                                    <button class="btn btn-secondary btn-sm" onclick="App.editHandover('${h.id}')">수정</button>
-                                                    <button class="btn btn-danger btn-sm" onclick="App.deleteHandover('${h.id}')">삭제</button>
-                                                </div>` : '-'}
-                                            </td>
-                                        </tr>`;
-                                    }).join('')}
+                                        // 관리자: 전체 / 직원: 본인이 인계자 또는 인수자인 것만
+                                        const visible = Auth.isAdmin()
+                                            ? data.handovers
+                                            : data.handovers.filter(h =>
+                                                String(h.from||'').trim() === myName ||
+                                                String(h.to||'').trim() === myName
+                                            );
+                                        if (visible.length === 0) return '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:1rem">인수인계 내역이 없습니다.</td></tr>';
+                                        return visible.sort((a,b) => b.date.localeCompare(a.date)).map(h => {
+                                            const hFrom = String(h.from || '').trim();
+                                            const isOwner = Auth.isAdmin() || hFrom === myName;
+                                            return `
+                                            <tr>
+                                                <td><input type="checkbox" class="handover-check" value="${h.id}"></td>
+                                                <td>${Utils.formatDateKr(h.date)}</td>
+                                                <td>${Utils.escapeHtml(h.from)}</td>
+                                                <td>${Utils.escapeHtml(h.to)}</td>
+                                                <td>${Utils.escapeHtml(h.content.substring(0,50))}${h.content.length>50?'...':''}</td>
+                                                <td>
+                                                    ${isOwner ? `
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-secondary btn-sm" onclick="App.editHandover('${h.id}')">수정</button>
+                                                        <button class="btn btn-danger btn-sm" onclick="App.deleteHandover('${h.id}')">삭제</button>
+                                                    </div>` : '-'}
+                                                </td>
+                                            </tr>`;
+                                        }).join('');
+                                    })()}
                                 </tbody>
                             </table>
                         </div>
