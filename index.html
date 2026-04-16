@@ -977,6 +977,47 @@
                 } catch(e) { console.error('새로고침 실패:', e); }
                 this.showLoading(false);
                 App.navigate(App.currentPage);
+            },
+
+            // 백그라운드 조용히 새로고침 (자동 새로고침용 - 로딩 오버레이 없음)
+            async silentRefresh() {
+                try {
+                    const all = await sheetsGet('getAll');
+                    let changed = false;
+
+                    const check = (key, newData) => {
+                        if (!Array.isArray(newData)) return;
+                        const oldStr = JSON.stringify(_cache[key]);
+                        const newStr = JSON.stringify(newData);
+                        if (oldStr !== newStr) { _cache[key] = newData; changed = true; }
+                    };
+
+                    check('members',   all.members);
+                    check('tasks',     all.tasks);
+                    check('vacations', all.vacations);
+                    check('handovers', all.handovers);
+                    check('issues',    all.issues);
+
+                    // 변경사항 있을 때만 화면 갱신
+                    if (changed && Auth.currentUser) {
+                        App.navigate(App.currentPage);
+                        // 상단에 작은 토스트 표시
+                        DataStore._showSyncToast();
+                    }
+                } catch(e) { console.error('자동 새로고침 실패:', e); }
+            },
+
+            _showSyncToast() {
+                let toast = document.getElementById('_syncToast');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = '_syncToast';
+                    toast.style.cssText = 'position:fixed;top:70px;right:16px;background:#27ae60;color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;z-index:9000;opacity:0;transition:opacity .3s;pointer-events:none;';
+                    toast.textContent = '🔄 데이터 업데이트됨';
+                    document.body.appendChild(toast);
+                }
+                toast.style.opacity = '1';
+                setTimeout(() => { toast.style.opacity = '0'; }, 2000);
             }
         };
 
@@ -1947,6 +1988,7 @@
                 document.getElementById('authScreen').classList.remove('hidden');
                 document.getElementById('appScreen').classList.add('hidden');
                 document.getElementById('syncBtn').style.display = 'none';
+                stopAutoRefresh();
             },
 
             showApp() {
@@ -1975,10 +2017,10 @@
                     `${Auth.currentUser.name} (${Auth.isAdmin() ? '관리자' : '직원'})`;
 
                 this.navigate('dashboard');
+                startAutoRefresh();
             },
 
             navigate(page) {
-                this.currentPage = page;
                 
                 // 네비게이션 활성화
                 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -2648,6 +2690,33 @@
 
         // 앱 시작
         document.addEventListener('DOMContentLoaded', () => App.init());
+
+        // ==================== 자동 새로고침 (30초) ====================
+        let _autoRefreshTimer = null;
+
+        function startAutoRefresh() {
+            stopAutoRefresh();
+            _autoRefreshTimer = setInterval(() => {
+                // 로그인 상태이고 페이지가 활성화된 경우에만 실행
+                if (Auth.currentUser && !document.hidden) {
+                    DataStore.silentRefresh();
+                }
+            }, 30000); // 30초
+        }
+
+        function stopAutoRefresh() {
+            if (_autoRefreshTimer) {
+                clearInterval(_autoRefreshTimer);
+                _autoRefreshTimer = null;
+            }
+        }
+
+        // 탭이 다시 활성화될 때 즉시 새로고침
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && Auth.currentUser) {
+                DataStore.silentRefresh();
+            }
+        });
 
         // ==================== PWA ====================
         // 서비스 워커 등록
