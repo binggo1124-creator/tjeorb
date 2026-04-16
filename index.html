@@ -1669,7 +1669,9 @@
                                 </thead>
                                 <tbody>
                                     ${data.handovers.sort((a, b) => b.date.localeCompare(a.date)).map(h => {
-                                        const isOwner = Auth.isAdmin() || h.from === Auth.currentUser.name;
+                                        const hFrom = String(h.from || '').trim();
+                                        const myName = String(Auth.currentUser.name || '').trim();
+                                        const isOwner = Auth.isAdmin() || hFrom === myName;
                                         return `
                                         <tr>
                                             <td><input type="checkbox" class="handover-check" value="${h.id}"></td>
@@ -2339,7 +2341,7 @@
                 const data = DataStore.getData();
                 const h = data.handovers.find(h => h.id === id);
                 if (!h) return;
-                if (!Auth.isAdmin() && h.from !== Auth.currentUser.name) {
+                if (!Auth.isAdmin() && String(h.from||'').trim() !== String(Auth.currentUser.name||'').trim()) {
                     Components.alert('본인의 인수인계만 수정할 수 있습니다.'); return;
                 }
 
@@ -2396,7 +2398,7 @@
                 const data = DataStore.getData();
                 const h = data.handovers.find(h => h.id === id);
                 if (!h) return;
-                if (!Auth.isAdmin() && h.from !== Auth.currentUser.name) {
+                if (!Auth.isAdmin() && String(h.from||'').trim() !== String(Auth.currentUser.name||'').trim()) {
                     Components.alert('본인의 인수인계만 삭제할 수 있습니다.'); return;
                 }
                 data.handovers = data.handovers.filter(h => h.id !== id);
