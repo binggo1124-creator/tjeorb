@@ -1621,7 +1621,55 @@
             // 인수인계
             handover() {
                 const data = DataStore.getData();
-                const members = DataStore.getMembers().filter(m => m.status === 'approved');
+                const myName = String(Auth.currentUser.name || '').trim();
+                const isAdmin = Auth.isAdmin();
+
+                // 인계 목록 (내가 인계자) — 관리자는 전체
+                const outList = isAdmin
+                    ? data.handovers
+                    : data.handovers.filter(h => String(h.from||'').trim() === myName);
+
+                // 인수 목록 (내가 인수자) — 관리자는 전체와 동일하므로 숨김
+                const inList = isAdmin
+                    ? []
+                    : data.handovers.filter(h => String(h.to||'').trim() === myName);
+
+                const renderTable = (list, showEdit) => {
+                    if (list.length === 0) return '<p style="color:#aaa;text-align:center;padding:.75rem">내역이 없습니다.</p>';
+                    return `<div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    ${showEdit ? '<th><input type="checkbox" class="selectAll-check"></th>' : '<th></th>'}
+                                    <th>인계일</th>
+                                    <th>인계자</th>
+                                    <th>인수자</th>
+                                    <th>내용</th>
+                                    <th>작업</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${list.sort((a,b)=>b.date.localeCompare(a.date)).map(h => {
+                                    const hFrom = String(h.from||'').trim();
+                                    const isOwner = isAdmin || hFrom === myName;
+                                    return `<tr>
+                                        <td>${showEdit ? `<input type="checkbox" class="handover-check" value="${h.id}">` : ''}</td>
+                                        <td>${Utils.formatDateKr(h.date)}</td>
+                                        <td>${Utils.escapeHtml(h.from)}</td>
+                                        <td>${Utils.escapeHtml(h.to)}</td>
+                                        <td>${Utils.escapeHtml(h.content.substring(0,50))}${h.content.length>50?'...':''}</td>
+                                        <td>${isOwner ? `
+                                            <div class="btn-group">
+                                                <button class="btn btn-secondary btn-sm" onclick="App.editHandover('${h.id}')">수정</button>
+                                                <button class="btn btn-danger btn-sm" onclick="App.deleteHandover('${h.id}')">삭제</button>
+                                            </div>` : '-'}
+                                        </td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>`;
+                };
 
                 return `
                     <div class="card">
@@ -1653,56 +1701,24 @@
                         </form>
                     </div>
 
+                    <!-- 인계 목록 (내가 인계자) -->
                     <div class="card">
-                        <h3 class="card-title">📋 인수인계 목록</h3>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox" id="selectAllHandover"></th>
-                                        <th>인계일</th>
-                                        <th>인계자</th>
-                                        <th>인수자</th>
-                                        <th>내용</th>
-                                        <th>작업</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${(() => {
-                                        const myName = String(Auth.currentUser.name || '').trim();
-                                        // 관리자: 전체 / 직원: 본인이 인계자 또는 인수자인 것만
-                                        const visible = Auth.isAdmin()
-                                            ? data.handovers
-                                            : data.handovers.filter(h =>
-                                                String(h.from||'').trim() === myName ||
-                                                String(h.to||'').trim() === myName
-                                            );
-                                        if (visible.length === 0) return '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:1rem">인수인계 내역이 없습니다.</td></tr>';
-                                        return visible.sort((a,b) => b.date.localeCompare(a.date)).map(h => {
-                                            const hFrom = String(h.from || '').trim();
-                                            const isOwner = Auth.isAdmin() || hFrom === myName;
-                                            return `
-                                            <tr>
-                                                <td><input type="checkbox" class="handover-check" value="${h.id}"></td>
-                                                <td>${Utils.formatDateKr(h.date)}</td>
-                                                <td>${Utils.escapeHtml(h.from)}</td>
-                                                <td>${Utils.escapeHtml(h.to)}</td>
-                                                <td>${Utils.escapeHtml(h.content.substring(0,50))}${h.content.length>50?'...':''}</td>
-                                                <td>
-                                                    ${isOwner ? `
-                                                    <div class="btn-group">
-                                                        <button class="btn btn-secondary btn-sm" onclick="App.editHandover('${h.id}')">수정</button>
-                                                        <button class="btn btn-danger btn-sm" onclick="App.deleteHandover('${h.id}')">삭제</button>
-                                                    </div>` : '-'}
-                                                </td>
-                                            </tr>`;
-                                        }).join('');
-                                    })()}
-                                </tbody>
-                            </table>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+                            <h3 class="card-title" style="margin:0;border:none;padding:0">
+                                📤 인계 목록 ${!isAdmin?`<span style="font-size:.8rem;color:var(--gray-600);font-weight:400">내가 인계한 내역</span>`:'<span style="font-size:.8rem;color:var(--gray-600);font-weight:400">전체</span>'}
+                            </h3>
+                            <button class="btn btn-secondary btn-sm" onclick="App.printHandovers()">선택 인쇄</button>
                         </div>
-                        <button class="btn btn-secondary mt-2" onclick="App.printHandovers()">선택 인쇄</button>
+                        ${renderTable(outList, true)}
                     </div>
+
+                    ${!isAdmin ? `
+                    <!-- 인수 목록 (내가 인수자) -->
+                    <div class="card">
+                        <h3 class="card-title">📥 인수 목록 <span style="font-size:.8rem;color:var(--gray-600);font-weight:400">내가 인수받은 내역</span></h3>
+                        ${renderTable(inList, false)}
+                    </div>
+                    ` : ''}
                 `;
             },
 
@@ -2340,9 +2356,10 @@
                 });
 
                 // 전체 선택
-                document.getElementById('selectAllHandover').addEventListener('change', (e) => {
-                    document.querySelectorAll('.handover-check').forEach(cb => {
-                        cb.checked = e.target.checked;
+                // 전체 선택 (인계 목록)
+                document.querySelectorAll('.selectAll-check').forEach(cb => {
+                    cb.addEventListener('change', (e) => {
+                        document.querySelectorAll('.handover-check').forEach(c => { c.checked = e.target.checked; });
                     });
                 });
             },
