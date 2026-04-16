@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>근무현황 대시보드</title>
- 
+
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3498db">
@@ -29,20 +29,20 @@
             --shadow: 0 2px 10px rgba(0,0,0,0.1);
             --radius: 8px;
         }
- 
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
- 
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--gray-100);
             color: var(--gray-800);
             line-height: 1.6;
         }
- 
+
         /* 유틸리티 클래스 */
         .hidden { display: none !important; }
         .text-center { text-align: center; }
@@ -52,7 +52,7 @@
         .mt-2 { margin-top: 1rem; }
         .mb-1 { margin-bottom: 0.5rem; }
         .mb-2 { margin-bottom: 1rem; }
- 
+
         /* 버튼 스타일 */
         .btn {
             padding: 0.5rem 1rem;
@@ -65,54 +65,54 @@
             align-items: center;
             gap: 0.5rem;
         }
- 
+
         .btn-primary {
             background: var(--primary);
             color: var(--white);
         }
- 
+
         .btn-primary:hover {
             background: var(--primary-dark);
         }
- 
+
         .btn-success {
             background: var(--success);
             color: var(--white);
         }
- 
+
         .btn-danger {
             background: var(--danger);
             color: var(--white);
         }
- 
+
         .btn-secondary {
             background: var(--gray-600);
             color: var(--white);
         }
- 
+
         .btn-sm {
             padding: 0.25rem 0.5rem;
             font-size: 0.8rem;
         }
- 
+
         .btn-group {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
         }
- 
+
         /* 폼 스타일 */
         .form-group {
             margin-bottom: 1rem;
         }
- 
+
         .form-group label {
             display: block;
             margin-bottom: 0.25rem;
             font-weight: 500;
             color: var(--gray-600);
         }
- 
+
         .form-control {
             width: 100%;
             padding: 0.5rem;
@@ -121,18 +121,18 @@
             font-size: 1rem;
             transition: border-color 0.2s;
         }
- 
+
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
         }
- 
+
         .form-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1rem;
         }
- 
+
         /* 카드 스타일 */
         .card {
             background: var(--white);
@@ -141,7 +141,7 @@
             padding: 1.5rem;
             margin-bottom: 1rem;
         }
- 
+
         .card-title {
             font-size: 1.25rem;
             font-weight: 600;
@@ -149,7 +149,7 @@
             padding-bottom: 0.5rem;
             border-bottom: 2px solid var(--primary);
         }
- 
+
         /* 로그인 화면 */
         .login-container {
             min-height: 100vh;
@@ -158,7 +158,7 @@
             justify-content: center;
             padding: 1rem;
         }
- 
+
         .login-box {
             background: var(--white);
             padding: 2rem;
@@ -167,18 +167,18 @@
             width: 100%;
             max-width: 400px;
         }
- 
+
         .login-title {
             text-align: center;
             margin-bottom: 1.5rem;
             color: var(--primary);
         }
- 
+
         .tab-buttons {
             display: flex;
             margin-bottom: 1.5rem;
         }
- 
+
         .tab-btn {
             flex: 1;
             padding: 0.75rem;
@@ -187,20 +187,20 @@
             cursor: pointer;
             transition: all 0.2s;
         }
- 
+
         .tab-btn:first-child {
             border-radius: var(--radius) 0 0 var(--radius);
         }
- 
+
         .tab-btn:last-child {
             border-radius: 0 var(--radius) var(--radius) 0;
         }
- 
+
         .tab-btn.active {
             background: var(--primary);
             color: var(--white);
         }
- 
+
         /* 헤더 */
         .header {
             background: var(--white);
@@ -210,7 +210,7 @@
             top: 0;
             z-index: 100;
         }
- 
+
         .header-content {
             max-width: 1400px;
             margin: 0 auto;
@@ -220,24 +220,24 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
- 
+
         .header-title {
             font-size: 1.5rem;
             color: var(--primary);
         }
- 
+
         .header-user {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
- 
+
         /* 네비게이션 */
         .nav {
             background: var(--gray-800);
             padding: 0.5rem 1rem;
         }
- 
+
         .nav-content {
             max-width: 1400px;
             margin: 0 auto;
@@ -245,7 +245,7 @@
             gap: 0.5rem;
             flex-wrap: wrap;
         }
- 
+
         .nav-btn {
             padding: 0.5rem 1rem;
             border: none;
@@ -255,48 +255,48 @@
             border-radius: var(--radius);
             transition: all 0.2s;
         }
- 
+
         .nav-btn:hover {
             background: var(--gray-600);
         }
- 
+
         .nav-btn.active {
             background: var(--primary);
             color: var(--white);
         }
- 
+
         /* 메인 컨텐츠 */
         .main {
             max-width: 1400px;
             margin: 0 auto;
             padding: 1rem;
         }
- 
+
         /* 테이블 스타일 */
         .table-container {
             overflow-x: auto;
         }
- 
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
- 
+
         th, td {
             padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid var(--gray-200);
         }
- 
+
         th {
             background: var(--gray-100);
             font-weight: 600;
         }
- 
+
         tr:hover {
             background: var(--gray-100);
         }
- 
+
         /* 배지 */
         .badge {
             display: inline-block;
@@ -305,7 +305,7 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
- 
+
         .badge-high { background: #ffebee; color: var(--danger); }
         .badge-mid { background: #fff3e0; color: var(--warning); }
         .badge-low { background: #e8f5e9; color: var(--success); }
@@ -314,32 +314,32 @@
         .badge-pending { background: #fff3e0; color: var(--warning); }
         .badge-approved { background: #e8f5e9; color: var(--success); }
         .badge-rejected { background: #ffebee; color: var(--danger); }
- 
+
         /* 대시보드 그리드 */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1rem;
         }
- 
+
         .dashboard-full {
             grid-column: 1 / -1;
         }
- 
+
         /* 주간 현황 */
         .week-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 0.5rem;
         }
- 
+
         .day-column {
             background: var(--gray-100);
             border-radius: var(--radius);
             padding: 0.5rem;
             min-height: 150px;
         }
- 
+
         .day-header {
             font-weight: 600;
             text-align: center;
@@ -349,7 +349,7 @@
             border-radius: var(--radius);
             margin-bottom: 0.5rem;
         }
- 
+
         .day-task {
             background: var(--white);
             padding: 0.5rem;
@@ -358,18 +358,18 @@
             font-size: 0.85rem;
             border-left: 3px solid var(--primary);
         }
- 
+
         .day-task.high { border-left-color: var(--danger); }
         .day-task.mid { border-left-color: var(--warning); }
         .day-task.low { border-left-color: var(--success); }
- 
+
         /* 캘린더 */
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 2px;
         }
- 
+
         .calendar-header {
             background: var(--gray-800);
             color: var(--white);
@@ -377,28 +377,28 @@
             text-align: center;
             font-weight: 500;
         }
- 
+
         .calendar-day {
             background: var(--white);
             padding: 0.5rem;
             min-height: 80px;
             border: 1px solid var(--gray-200);
         }
- 
+
         .calendar-day.other-month {
             background: var(--gray-100);
             color: var(--gray-600);
         }
- 
+
         .calendar-day.today {
             background: #e3f2fd;
         }
- 
+
         .calendar-date {
             font-weight: 600;
             margin-bottom: 0.25rem;
         }
- 
+
         .calendar-event {
             font-size: 0.7rem;
             padding: 0.125rem 0.25rem;
@@ -410,7 +410,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
- 
+
         /* 차트 컨테이너 */
         .chart-container {
             display: flex;
@@ -419,29 +419,29 @@
             gap: 2rem;
             flex-wrap: wrap;
         }
- 
+
         .chart-wrapper {
             text-align: center;
         }
- 
+
         .chart-legend {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
- 
+
         .legend-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
- 
+
         .legend-color {
             width: 16px;
             height: 16px;
             border-radius: 4px;
         }
- 
+
         /* 이슈 카드 */
         .issue-item {
             padding: 0.75rem;
@@ -450,12 +450,12 @@
             border-radius: 0 var(--radius) var(--radius) 0;
             margin-bottom: 0.5rem;
         }
- 
+
         .issue-item.urgent {
             background: #ffebee;
             border-left-color: var(--danger);
         }
- 
+
         /* 모달 */
         .modal-backdrop {
             position: fixed;
@@ -469,7 +469,7 @@
             justify-content: center;
             z-index: 1000;
         }
- 
+
         .modal {
             background: var(--white);
             border-radius: var(--radius);
@@ -479,24 +479,24 @@
             max-height: 90vh;
             overflow-y: auto;
         }
- 
+
         .modal-title {
             font-size: 1.25rem;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
             border-bottom: 1px solid var(--gray-200);
         }
- 
+
         /* 인쇄 스타일 */
         @media print {
             body * {
                 visibility: hidden;
             }
- 
+
             .print-area, .print-area * {
                 visibility: visible;
             }
- 
+
             .print-area {
                 position: absolute;
                 left: 0;
@@ -504,77 +504,77 @@
                 width: 210mm;
                 padding: 20mm;
             }
- 
+
             .print-header {
                 text-align: center;
                 margin-bottom: 20px;
                 padding-bottom: 10px;
                 border-bottom: 2px solid #000;
             }
- 
+
             .print-title {
                 font-size: 24px;
                 font-weight: bold;
             }
- 
+
             .print-table {
                 width: 100%;
                 border-collapse: collapse;
                 margin-bottom: 20px;
             }
- 
+
             .print-table th,
             .print-table td {
                 border: 1px solid #000;
                 padding: 8px;
             }
- 
+
             .print-table th {
                 background: #f0f0f0;
             }
- 
+
             .signature-area {
                 display: flex;
                 justify-content: flex-end;
                 margin-top: 40px;
             }
- 
+
             .signature-box {
                 border: 1px solid #000;
                 text-align: center;
             }
- 
+
             .signature-box div {
                 padding: 5px 20px;
                 border-bottom: 1px solid #000;
             }
- 
+
             .signature-box div:last-child {
                 border-bottom: none;
                 height: 60px;
             }
         }
- 
+
         /* 반응형 */
         @media (max-width: 768px) {
             .week-grid {
                 grid-template-columns: 1fr;
             }
- 
+
             .form-row {
                 grid-template-columns: 1fr;
             }
- 
+
             .header-content {
                 flex-direction: column;
                 text-align: center;
             }
- 
+
             .nav-content {
                 justify-content: center;
             }
         }
- 
+
         /* 이월업무 */
         .carry-header { display:flex; align-items:center; gap:.75rem; margin-bottom:.75rem; font-weight:600; font-size:1rem; }
         .carry-sub { font-size:.8rem; color:var(--gray-600); font-weight:400; background:var(--gray-200); padding:2px 8px; border-radius:999px; }
@@ -583,7 +583,7 @@
         .carry-date { color:var(--danger); font-weight:600; }
         .today-col { border:2px solid var(--primary) !important; }
         .today-header { background:var(--primary-dark) !important; }
- 
+
         /* 휴가 달력 */
         .vac-calendar { overflow-x:auto; }
         .vac-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; min-width:560px; }
@@ -600,7 +600,7 @@
         .vac-date-link { display:inline-block; padding:2px 6px; border-radius:4px; background:#e3f2fd; color:var(--primary); cursor:pointer; font-size:.85rem; margin:1px; transition:background .15s; }
         .vac-date-link:hover { background:var(--primary); color:#fff; }
         .handover-modal-item { padding:.6rem .75rem; border-left:3px solid var(--primary); background:var(--gray-100); border-radius:0 4px 4px 0; margin-bottom:.5rem; font-size:.9rem; }
- 
+
         /* 전체 직원 업무현황 테이블 */
         .staff-week-table { width:100%; border-collapse:collapse; font-size:.83rem; }
         .staff-week-table th, .staff-week-table td { border:1px solid var(--gray-200); padding:6px 8px; vertical-align:top; min-width:90px; }
@@ -618,7 +618,7 @@
     <div id="authScreen" class="login-container">
         <div class="login-box">
             <h1 class="login-title">📊 근무현황 대시보드</h1>
- 
+
             <!-- PWA 설치 버튼 -->
             <div id="pwaInstallBox" style="display:none;margin-bottom:1.2rem;">
                 <div style="background:linear-gradient(135deg,#3498db,#2980b9);border-radius:var(--radius);padding:1rem;text-align:center;color:#fff;">
@@ -635,7 +635,7 @@
                 <button class="tab-btn active" data-tab="login">로그인</button>
                 <button class="tab-btn" data-tab="signup">회원가입</button>
             </div>
- 
+
             <!-- 로그인 폼 -->
             <form id="loginForm">
                 <div class="form-group">
@@ -649,7 +649,7 @@
                 <button type="submit" class="btn btn-primary" style="width:100%">로그인</button>
                 <p id="loginError" class="text-danger text-center mt-1 hidden"></p>
             </form>
- 
+
             <!-- 회원가입 폼 -->
             <form id="signupForm" class="hidden">
                 <div class="form-group">
@@ -682,7 +682,7 @@
             </form>
         </div>
     </div>
- 
+
     <!-- 메인 앱 -->
     <div id="appScreen" class="hidden">
         <header class="header">
@@ -697,7 +697,7 @@
                 </div>
             </div>
         </header>
- 
+
         <nav class="nav">
             <div class="nav-content">
                 <button class="nav-btn active" data-page="dashboard">대시보드</button>
@@ -709,13 +709,13 @@
                 <button class="nav-btn admin-only" data-page="members">회원 관리</button>
             </div>
         </nav>
- 
+
         <main class="main" id="mainContent"></main>
     </div>
- 
+
     <!-- 인쇄 영역 -->
     <div id="printArea" class="print-area hidden"></div>
- 
+
     <script>
         // ==================== 유틸리티 ====================
         const Utils = {
@@ -726,7 +726,7 @@
                 div.textContent = String(text);
                 return div.innerHTML;
             },
- 
+
             // 날짜 포맷
             formatDate(date) {
                 if (!date) return '';
@@ -734,7 +734,7 @@
                 if (isNaN(d.getTime())) return '';
                 return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             },
- 
+
             // 날짜를 YYYY-MM-DD(요일) 형식으로 표시
             formatDateKr(dateStr) {
                 if (!dateStr) return '';
@@ -745,12 +745,12 @@
                 const days = ['일','월','화','수','목','금','토'];
                 return `${clean}(${days[d.getDay()]})`;
             },
- 
+
             // 오늘 날짜
             today() {
                 return this.formatDate(new Date());
             },
- 
+
             // 주의 시작일 (월요일)
             getWeekStart(date = new Date()) {
                 const d = new Date(date);
@@ -759,7 +759,7 @@
                 d.setDate(diff);
                 return d;
             },
- 
+
             // 날짜 범위 생성
             getDateRange(start, end) {
                 const dates = [];
@@ -771,13 +771,13 @@
                 }
                 return dates;
             },
- 
+
             // 요일 이름
             getDayName(date) {
                 const days = ['일', '월', '화', '수', '목', '금', '토'];
                 return days[new Date(date).getDay()];
             },
- 
+
             // 비밀번호 해시 (간단한 버전 - 실제로는 bcrypt 등 사용)
             hashPassword(pw) {
                 let hash = 0;
@@ -788,17 +788,17 @@
                 }
                 return 'h' + Math.abs(hash).toString(16);
             },
- 
+
             // ID 생성
             generateId() {
                 return Date.now().toString(36) + Math.random().toString(36).substr(2);
             },
- 
+
             // 검증
             validatePin(pin) {
                 return /^\d{4}$/.test(pin);
             },
- 
+
             validateName(name) {
                 return name && name.trim().length >= 2;
             },
@@ -836,11 +836,11 @@
                 return h;
             }
         };
- 
+
         // ==================== Google Sheets 연동 ====================
         const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwyP9LjBTQqE-eusKgQHnF7k0g5DxxySmEpdAIqS7OlNZ1ft2SDilcy07_BVgwhq-qU/exec';
         let _cache = { members: null, tasks: [], vacations: [], handovers: [], issues: [] };
- 
+
         async function sheetsGet(action, sheet) {
             const url = SHEETS_URL + '?action=' + action + (sheet ? '&sheet=' + sheet : '');
             const res = await fetch(url);
@@ -850,17 +850,17 @@
             const res = await fetch(SHEETS_URL, { method:'POST', body: JSON.stringify(body) });
             return await res.json();
         }
- 
+
         const DataStore = {
             KEYS: { SESSION: 'dashboard_session' },
- 
+
             defaultAdmin: {
                 id: 'admin_default', name: '관리자',
                 password: Utils.hashPassword('1234'),
                 role: 'admin', status: 'approved',
                 createdAt: new Date().toISOString()
             },
- 
+
             async init() {
                 this.showLoading(true);
                 try {
@@ -870,7 +870,7 @@
                     _cache.vacations = Array.isArray(all.vacations)  ? all.vacations : [];
                     _cache.handovers = Array.isArray(all.handovers)  ? all.handovers : [];
                     _cache.issues    = Array.isArray(all.issues)     ? all.issues    : [];
- 
+
                     const adminIdx = _cache.members.findIndex(m => m.name === '관리자' || m.id === 'admin_default');
                     if (adminIdx === -1) {
                         await sheetsPost({ action:'save', sheet:'members', data: this.defaultAdmin });
@@ -905,7 +905,7 @@
                 }
                 this.showLoading(false);
             },
- 
+
             showLoading(show) {
                 let el = document.getElementById('_loadingOverlay');
                 if (show) {
@@ -926,15 +926,15 @@
                     if (el) el.remove();
                 }
             },
- 
+
             getMembers() { return _cache.members || []; },
- 
+
             saveMembers(members) {
                 _cache.members = members;
                 localStorage.setItem('_members', JSON.stringify(members));
                 sheetsPost({ action:'saveAll', data:{ members } }).catch(()=>{});
             },
- 
+
             getData() {
                 return {
                     tasks:     _cache.tasks     || [],
@@ -943,7 +943,7 @@
                     issues:    _cache.issues    || []
                 };
             },
- 
+
             saveData(data) {
                 if (data.tasks     !== undefined) _cache.tasks     = data.tasks;
                 if (data.vacations !== undefined) _cache.vacations = data.vacations;
@@ -958,13 +958,13 @@
                     handovers: _cache.handovers, issues: _cache.issues
                 }}).catch(()=>{});
             },
- 
+
             getSession() {
                 try { return JSON.parse(sessionStorage.getItem(this.KEYS.SESSION)); } catch { return null; }
             },
             setSession(user) { sessionStorage.setItem(this.KEYS.SESSION, JSON.stringify(user)); },
             clearSession()   { sessionStorage.removeItem(this.KEYS.SESSION); },
- 
+
             async refresh() {
                 this.showLoading(true);
                 try {
@@ -979,11 +979,11 @@
                 App.navigate(App.currentPage);
             }
         };
- 
+
         // ==================== 인증 관리 ====================
         const Auth = {
             currentUser: null,
- 
+
             init() {
                 const session = DataStore.getSession();
                 if (session) {
@@ -996,10 +996,10 @@
                 }
                 return false;
             },
- 
+
             login(name, password) {
                 const hashedPw = Utils.hashPassword(password);
- 
+
                 // 관리자 계정은 Sheets 데이터와 무관하게 항상 인증 허용
                 if (name === '관리자' && password === '1234') {
                     const members = DataStore.getMembers();
@@ -1015,13 +1015,13 @@
                     DataStore.setSession({ id: admin.id });
                     return { success: true };
                 }
- 
+
                 const members = DataStore.getMembers();
                 const user = members.find(m =>
                     m.name === name &&
                     m.password === hashedPw
                 );
- 
+
                 if (!user) {
                     return { success: false, error: '이름 또는 비밀번호가 올바르지 않습니다.' };
                 }
@@ -1031,12 +1031,12 @@
                 if (user.status === 'rejected') {
                     return { success: false, error: '가입이 거절되었습니다.' };
                 }
- 
+
                 this.currentUser = user;
                 DataStore.setSession({ id: user.id });
                 return { success: true };
             },
- 
+
             signup(name, password, empNo, worksite, dept) {
                 if (!Utils.validateName(name)) {
                     return { success: false, error: '이름은 2자 이상이어야 합니다.' };
@@ -1047,12 +1047,12 @@
                 if (!empNo || !empNo.trim()) return { success: false, error: '사번을 입력하세요.' };
                 if (!worksite || !worksite.trim()) return { success: false, error: '근무지를 입력하세요.' };
                 if (!dept || !dept.trim()) return { success: false, error: '부서를 입력하세요.' };
- 
+
                 const members = DataStore.getMembers();
                 if (members.find(m => m.name === name)) {
                     return { success: false, error: '이미 존재하는 이름입니다.' };
                 }
- 
+
                 const newMember = {
                     id: Utils.generateId(),
                     name: name.trim(),
@@ -1064,26 +1064,26 @@
                     status: 'pending',
                     createdAt: new Date().toISOString()
                 };
- 
+
                 members.push(newMember);
                 DataStore.saveMembers(members);
                 return { success: true };
             },
- 
+
             logout() {
                 this.currentUser = null;
                 DataStore.clearSession();
             },
- 
+
             changePassword(oldPw, newPw) {
                 if (!Utils.validatePin(newPw)) {
                     return { success: false, error: '비밀번호는 4자리 숫자여야 합니다.' };
                 }
- 
+
                 if (Utils.hashPassword(oldPw) !== this.currentUser.password) {
                     return { success: false, error: '현재 비밀번호가 올바르지 않습니다.' };
                 }
- 
+
                 const members = DataStore.getMembers();
                 const idx = members.findIndex(m => m.id === this.currentUser.id);
                 if (idx !== -1) {
@@ -1094,19 +1094,19 @@
                 }
                 return { success: false, error: '사용자를 찾을 수 없습니다.' };
             },
- 
+
             isAdmin() {
                 return this.currentUser?.role === 'admin';
             }
         };
- 
+
         // ==================== UI 컴포넌트 ====================
         const Components = {
             // 배지 생성
             badge(text, type) {
                 return `<span class="badge badge-${type}">${Utils.escapeHtml(text)}</span>`;
             },
- 
+
             // 업무 상태 배지
             statusBadge(status) {
                 const map = {
@@ -1116,7 +1116,7 @@
                 const s = map[status] || { text: status, type: 'progress' };
                 return this.badge(s.text, s.type);
             },
- 
+
             // 중요도 배지
             priorityBadge(priority) {
                 const map = {
@@ -1127,7 +1127,7 @@
                 const p = map[priority] || { text: priority, type: 'mid' };
                 return this.badge(p.text, p.type);
             },
- 
+
             // 승인 상태 배지
             approvalBadge(status) {
                 const map = {
@@ -1138,7 +1138,7 @@
                 const s = map[status] || { text: status, type: 'pending' };
                 return this.badge(s.text, s.type);
             },
- 
+
             // 직원 선택 옵션
             staffOptions(includeAll = false) {
                 const members = DataStore.getMembers().filter(m => m.status === 'approved');
@@ -1148,7 +1148,7 @@
                 });
                 return options;
             },
- 
+
             // 모달 표시
             showModal(title, content, onClose) {
                 const backdrop = document.createElement('div');
@@ -1166,25 +1166,25 @@
                         if (onClose) onClose();
                     }
                 });
- 
+
                 document.body.appendChild(backdrop);
                 return backdrop;
             },
- 
+
             // 확인 대화상자
             confirm(message) {
                 return window.confirm(message);
             },
- 
+
             // 알림
             alert(message) {
                 window.alert(message);
             }
         };
- 
+
         // ==================== 페이지 렌더링 ====================
         const Pages = {
- 
+
             // 휴가 달력 렌더러
             vacationCalendar(yearMonth, vacations) {
                 const [year, month] = yearMonth.split('-').map(Number);
@@ -1203,7 +1203,7 @@
                 const nameColorMap = {};
                 let ci = 0;
                 vacations.forEach(v => { if (!nameColorMap[v.name]) nameColorMap[v.name] = colors[ci++ % colors.length]; });
- 
+
                 let html = `<div class="vac-calendar"><div class="vac-cal-grid">`;
                 dayNames.forEach((d,i) => {
                     const c = i===0?'color:#e74c3c':i===6?'color:#3498db':'';
@@ -1239,7 +1239,7 @@
                 html += `</div>`;
                 return html;
             },
- 
+
             // 대시보드
             dashboard() {
                 const data = DataStore.getData();
@@ -1258,36 +1258,36 @@
                 const weekLabel = `${weekDates[0].substring(5)} ~ ${weekDates[4].substring(5)}`;
                 const isCurrentWeek = offset === 0;
                 const dayNames = ['월','화','수','목','금'];
- 
+
                 // 내 업무 헬퍼
                 const getTasksFor = (name) => data.tasks.filter(t =>
                     t.assignee === name || (!t.assignee && t.createdBy === name)
                 );
- 
+
                 const myTasks = getTasksFor(Auth.currentUser.name);
- 
+
                 // 이월업무: 이번 주 시작일 이전 진행중
                 const carryTasks = isAdmin
                     ? data.tasks.filter(t => t.status === 'progress' && t.date < weekDates[0])
                     : myTasks.filter(t => t.status === 'progress' && t.date < weekDates[0]);
- 
+
                 // 주간업무 (본인)
                 const weekTasks = myTasks.filter(t =>
                     t.status === 'done' ? weekDates.includes(t.date) : t.date >= weekDates[0] && t.date <= weekDates[4]
                 );
- 
+
                 const activeIssues = data.issues.filter(i => i.active);
- 
+
                 // 달력 월 (별도 오프셋)
                 const calOffset = App._calOffset || 0;
                 const calBase = new Date();
                 calBase.setMonth(calBase.getMonth() + calOffset);
                 const calMonth = `${calBase.getFullYear()}-${String(calBase.getMonth()+1).padStart(2,'0')}`;
                 const monthVacations = data.vacations.filter(v => Utils.parseDates(v.dates).some(d => d.startsWith(calMonth)));
- 
+
                 // 관리자: 전체 직원 목록
                 const allMembers = DataStore.getMembers().filter(m => m.status === 'approved' && m.role !== 'admin');
- 
+
                 // 이월업무 렌더 헬퍼
                 const renderCarry = (tasks, showAssignee) => {
                     if (tasks.length === 0) return `<p style="color:var(--success);font-size:.9rem">이월된 미완료 업무가 없습니다. 👍</p>`;
@@ -1309,10 +1309,10 @@
                     ).join('');
                     return `<div>${headCols}${rows}</div>`;
                 };
- 
+
                 return `
                     <div class="dashboard-grid">
- 
+
                         <!-- 이월업무 -->
                         <div class="card dashboard-full">
                             <div class="carry-header">
@@ -1321,7 +1321,7 @@
                             </div>
                             ${renderCarry(carryTasks, isAdmin)}
                         </div>
- 
+
                         ${isAdmin ? `
                         <!-- 관리자: 전체 직원 주간업무현황 -->
                         <div class="card dashboard-full">
@@ -1389,7 +1389,7 @@
                             </div>
                         </div>
                         `}
- 
+
                         <!-- 이슈 -->
                         <div class="card">
                             <h3 class="card-title">⚠️ 진행 중 이슈</h3>
@@ -1401,7 +1401,7 @@
                                     <small style="color:#999">${Utils.formatDateKr(issue.createdAt)}</small>
                                 </div>`).join('')}
                         </div>
- 
+
                         <!-- 휴가 달력 -->
                         <div class="card dashboard-full">
                             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
@@ -1417,7 +1417,7 @@
                     </div>
                 `;
             },
- 
+
             // 업무 관리
             tasks() {
                 const data = DataStore.getData();
@@ -1428,7 +1428,7 @@
                     t.assignee === Auth.currentUser.name || 
                     (!t.assignee && t.createdBy === Auth.currentUser.name)
                 );
- 
+
                 return `
                     <div class="card">
                         <h3 class="card-title">✏️ 업무 작성</h3>
@@ -1470,7 +1470,7 @@
                             <button type="submit" class="btn btn-primary">업무 등록</button>
                         </form>
                     </div>
- 
+
                     <div class="card">
                         <h3 class="card-title">📋 업무 목록</h3>
                         <div class="form-row mb-2">
@@ -1532,14 +1532,14 @@
                     </div>
                 `;
             },
- 
+
             // 휴가 계획
             vacation() {
                 const data = DataStore.getData();
                 const isAdmin = Auth.isAdmin();
                 const myVacations = isAdmin ? data.vacations :
                     data.vacations.filter(v => v.name === Auth.currentUser.name);
- 
+
                 return `
                     <div class="card">
                         <h3 class="card-title">🏖️ 휴가 신청</h3>
@@ -1576,12 +1576,12 @@
                         </div>
                     </div>`;
             },
- 
+
             // 인수인계
             handover() {
                 const data = DataStore.getData();
                 const members = DataStore.getMembers().filter(m => m.status === 'approved');
- 
+
                 return `
                     <div class="card">
                         <h3 class="card-title">📝 인수인계 작성</h3>
@@ -1611,7 +1611,7 @@
                             <button type="submit" class="btn btn-primary">인수인계 등록</button>
                         </form>
                     </div>
- 
+
                     <div class="card">
                         <h3 class="card-title">📋 인수인계 목록</h3>
                         <div class="table-container">
@@ -1652,11 +1652,11 @@
                     </div>
                 `;
             },
- 
+
             // 이슈 관리 (관리자)
             issues() {
                 const data = DataStore.getData();
- 
+
                 return `
                     <div class="card">
                         <h3 class="card-title">⚠️ 이슈 등록</h3>
@@ -1681,7 +1681,7 @@
                             <button type="submit" class="btn btn-primary">이슈 등록</button>
                         </form>
                     </div>
- 
+
                     <div class="card">
                         <h3 class="card-title">📋 이슈 목록</h3>
                         <div class="table-container">
@@ -1721,18 +1721,18 @@
                     </div>
                 `;
             },
- 
+
             // 업무 분석 (관리자)
             analysis() {
                 const data = DataStore.getData();
                 const members = DataStore.getMembers().filter(m => m.status === 'approved' && m.role !== 'admin');
                 const currentMonth = Utils.today().substring(0, 7);
- 
+
                 // 월간 완료 업무 통계
                 const monthTasks = data.tasks.filter(t => 
                     t.date.startsWith(currentMonth) && t.status === 'done'
                 );
- 
+
                 const stats = {};
                 members.forEach(m => {
                     stats[m.name] = {
@@ -1741,7 +1741,7 @@
                         priority: { high: 0, mid: 0, low: 0 }
                     };
                 });
- 
+
                 monthTasks.forEach(t => {
                     const name = t.assignee || t.createdBy;
                     if (stats[name]) {
@@ -1750,7 +1750,7 @@
                         stats[name].priority[t.priority]++;
                     }
                 });
- 
+
                 return `
                     <div class="card">
                         <h3 class="card-title">📊 ${currentMonth} 업무 분석</h3>
@@ -1782,7 +1782,7 @@
                             </table>
                         </div>
                     </div>
- 
+
                     <div class="dashboard-grid">
                         <div class="card">
                             <h3 class="card-title">⏱️ 소요시간 분포</h3>
@@ -1801,7 +1801,7 @@
                     </div>
                 `;
             },
- 
+
             // 회원 관리 (관리자)
             members() {
                 const members = DataStore.getMembers();
@@ -1863,14 +1863,14 @@
                 `;
             }
         };
- 
+
         // ==================== 차트 ====================
         const Charts = {
             drawDonut(canvasId, legendId, data, colors) {
                 const canvas = document.getElementById(canvasId);
                 const legend = document.getElementById(legendId);
                 if (!canvas || !legend) return;
- 
+
                 const ctx = canvas.getContext('2d');
                 const total = data.reduce((sum, d) => sum + d.value, 0);
                 
@@ -1886,7 +1886,7 @@
                     legend.innerHTML = '<p style="color:#999">데이터 없음</p>';
                     return;
                 }
- 
+
                 let startAngle = -Math.PI / 2;
                 
                 data.forEach((d, i) => {
@@ -1899,13 +1899,13 @@
                     ctx.fill();
                     startAngle += sliceAngle;
                 });
- 
+
                 // 가운데 원 (도넛)
                 ctx.fillStyle = '#fff';
                 ctx.beginPath();
                 ctx.arc(100, 100, 40, 0, Math.PI * 2);
                 ctx.fill();
- 
+
                 // 범례
                 legend.innerHTML = data.map((d, i) => `
                     <div class="legend-item">
@@ -1915,23 +1915,23 @@
                 `).join('');
             }
         };
- 
+
         // ==================== 앱 메인 ====================
         const App = {
             currentPage: 'dashboard',
             _weekOffset: 0,
             _calOffset: 0,
- 
+
             changeWeekOffset(delta) {
                 this._weekOffset += delta;
                 this.navigate('dashboard');
             },
- 
+
             changeCalOffset(delta) {
                 this._calOffset += delta;
                 this.navigate('dashboard');
             },
- 
+
             async init() {
                 
                 if (Auth.init()) {
@@ -1939,21 +1939,21 @@
                 } else {
                     this.showAuth();
                 }
- 
+
                 this.bindEvents();
             },
- 
+
             showAuth() {
                 document.getElementById('authScreen').classList.remove('hidden');
                 document.getElementById('appScreen').classList.add('hidden');
                 document.getElementById('syncBtn').style.display = 'none';
             },
- 
+
             showApp() {
                 document.getElementById('authScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 document.getElementById('syncBtn').style.display = 'inline-block';
- 
+
                 // Sheets 연결 상태 배너
                 const existBanner = document.getElementById('_sheetsBanner');
                 if (existBanner) existBanner.remove();
@@ -1969,14 +1969,14 @@
                 document.querySelectorAll('.admin-only').forEach(el => {
                     el.classList.toggle('hidden', !Auth.isAdmin());
                 });
- 
+
                 // 사용자 정보
                 document.getElementById('userInfo').textContent = 
                     `${Auth.currentUser.name} (${Auth.isAdmin() ? '관리자' : '직원'})`;
- 
+
                 this.navigate('dashboard');
             },
- 
+
             navigate(page) {
                 this.currentPage = page;
                 
@@ -1984,7 +1984,7 @@
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.page === page);
                 });
- 
+
                 // 페이지 렌더링
                 const content = document.getElementById('mainContent');
                 if (Pages[page]) {
@@ -1992,7 +1992,7 @@
                     this.bindPageEvents(page);
                 }
             },
- 
+
             bindEvents() {
                 // 탭 전환
                 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -2005,7 +2005,7 @@
                         document.getElementById('signupForm').classList.toggle('hidden', tab !== 'signup');
                     });
                 });
- 
+
                 // 로그인
                 document.getElementById('loginForm').addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -2021,7 +2021,7 @@
                         error.classList.remove('hidden');
                     }
                 });
- 
+
                 // 회원가입
                 document.getElementById('signupForm').addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -2036,13 +2036,13 @@
                     const success = document.getElementById('signupSuccess');
                     error.classList.add('hidden');
                     success.classList.add('hidden');
- 
+
                     if (pw !== pwConfirm) {
                         error.textContent = '비밀번호가 일치하지 않습니다.';
                         error.classList.remove('hidden');
                         return;
                     }
- 
+
                     const result = Auth.signup(name, pw, empNo, worksite, dept);
                     if (result.success) {
                         success.textContent = '가입 신청이 완료되었습니다. 관리자 승인 후 이용 가능합니다.';
@@ -2053,13 +2053,13 @@
                         error.classList.remove('hidden');
                     }
                 });
- 
+
                 // 로그아웃
                 document.getElementById('logoutBtn').addEventListener('click', () => {
                     Auth.logout();
                     this.showAuth();
                 });
- 
+
                 // 비밀번호 변경
                 document.getElementById('changePwBtn').addEventListener('click', () => {
                     const modal = Components.showModal('비밀번호 변경', `
@@ -2080,20 +2080,20 @@
                             <button type="submit" class="btn btn-primary">변경</button>
                         </form>
                     `);
- 
+
                     modal.querySelector('#changePwForm').addEventListener('submit', (e) => {
                         e.preventDefault();
                         const current = modal.querySelector('#currentPw').value;
                         const newPw = modal.querySelector('#newPw').value;
                         const confirm = modal.querySelector('#newPwConfirm').value;
                         const error = modal.querySelector('#changePwError');
- 
+
                         if (newPw !== confirm) {
                             error.textContent = '새 비밀번호가 일치하지 않습니다.';
                             error.classList.remove('hidden');
                             return;
                         }
- 
+
                         const result = Auth.changePassword(current, newPw);
                         if (result.success) {
                             Components.alert('비밀번호가 변경되었습니다.');
@@ -2104,7 +2104,7 @@
                         }
                     });
                 });
- 
+
                 // 네비게이션
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -2112,7 +2112,7 @@
                     });
                 });
             },
- 
+
             bindPageEvents(page) {
                 switch (page) {
                     case 'tasks':
@@ -2133,7 +2133,7 @@
                         break;
                 }
             },
- 
+
             bindTaskEvents() {
                 document.getElementById('taskForm').addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -2150,17 +2150,17 @@
                         assignee: document.getElementById('taskAssignee')?.value || '',
                         createdAt: new Date().toISOString()
                     };
- 
+
                     data.tasks.push(task);
                     DataStore.saveData(data);
                     this.navigate('tasks');
                 });
- 
+
                 // 필터
                 document.getElementById('filterStatus').addEventListener('change', () => this.filterTasks());
                 document.getElementById('filterMonth').addEventListener('change', () => this.filterTasks());
             },
- 
+
             filterTasks() {
                 const status = document.getElementById('filterStatus').value;
                 const month = document.getElementById('filterMonth').value;
@@ -2175,7 +2175,7 @@
                     row.style.display = statusMatch && monthMatch ? '' : 'none';
                 });
             },
- 
+
             completeTask(id) {
                 const data = DataStore.getData();
                 const task = data.tasks.find(t => t.id === id);
@@ -2188,7 +2188,7 @@
                 DataStore.saveData(data);
                 this.navigate('tasks');
             },
- 
+
             reopenTask(id) {
                 const data = DataStore.getData();
                 const task = data.tasks.find(t => t.id === id);
@@ -2201,7 +2201,7 @@
                 DataStore.saveData(data);
                 this.navigate('tasks');
             },
- 
+
             deleteTask(id) {
                 if (!Components.confirm('정말 삭제하시겠습니까?')) return;
                 const data = DataStore.getData();
@@ -2214,16 +2214,16 @@
                 DataStore.saveData(data);
                 this.navigate('tasks');
             },
- 
+
             bindVacationEvents() {
                 const typeSelect = document.getElementById('vacationType');
                 const endGroup = document.getElementById('vacationEndGroup');
- 
+
                 typeSelect.addEventListener('change', () => {
                     const type = typeSelect.value;
                     endGroup.style.display = (type === '연차' || type === '경조사') ? 'block' : 'none';
                 });
- 
+
                 document.getElementById('vacationForm').addEventListener('submit', (e) => {
                     e.preventDefault();
                     const data = DataStore.getData();
@@ -2249,7 +2249,7 @@
                     this.navigate('vacation');
                 });
             },
- 
+
             deleteVacation(id) {
                 if (!Components.confirm('정말 삭제하시겠습니까?')) return;
                 const data = DataStore.getData();
@@ -2262,7 +2262,7 @@
                 DataStore.saveData(data);
                 this.navigate('vacation');
             },
- 
+
             bindHandoverEvents() {
                 document.getElementById('handoverForm').addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -2279,12 +2279,12 @@
                         content: document.getElementById('handoverContent').value.trim(),
                         createdAt: new Date().toISOString()
                     };
- 
+
                     data.handovers.push(handover);
                     DataStore.saveData(data);
                     this.navigate('handover');
                 });
- 
+
                 // 전체 선택
                 document.getElementById('selectAllHandover').addEventListener('change', (e) => {
                     document.querySelectorAll('.handover-check').forEach(cb => {
@@ -2292,7 +2292,7 @@
                     });
                 });
             },
- 
+
             editHandover(id) {
                 const data = DataStore.getData();
                 const h = data.handovers.find(h => h.id === id);
@@ -2300,12 +2300,12 @@
                 if (!Auth.isAdmin() && h.from !== Auth.currentUser.name) {
                     Components.alert('본인의 인수인계만 수정할 수 있습니다.'); return;
                 }
- 
+
                 const members = DataStore.getMembers().filter(m => m.status === 'approved');
                 const toOptions = members.map(m =>
                     `<option value="${Utils.escapeHtml(m.name)}" ${m.name === h.to ? 'selected' : ''}>${Utils.escapeHtml(m.name)}</option>`
                 ).join('');
- 
+
                 const modal = Components.showModal('📝 인수인계 수정', `
                     <div class="form-group">
                         <label>인계일</label>
@@ -2326,29 +2326,29 @@
                     </div>
                 `);
             },
- 
+
             saveHandoverEdit(id) {
                 const data = DataStore.getData();
                 const h = data.handovers.find(h => h.id === id);
                 if (!h) return;
- 
+
                 const date = document.getElementById('editHandoverDate').value;
                 const to = document.getElementById('editHandoverTo').value;
                 const content = document.getElementById('editHandoverContent').value.trim();
- 
+
                 if (!date) { document.getElementById('editHandoverError').textContent = '인계일을 입력하세요.'; document.getElementById('editHandoverError').classList.remove('hidden'); return; }
                 if (!content) { document.getElementById('editHandoverError').textContent = '내용을 입력하세요.'; document.getElementById('editHandoverError').classList.remove('hidden'); return; }
- 
+
                 h.date = date;
                 h.to = to;
                 h.content = content;
                 h.updatedAt = new Date().toISOString();
- 
+
                 DataStore.saveData(data);
                 document.querySelector('.modal-backdrop')?.remove();
                 this.navigate('handover');
             },
- 
+
             deleteHandover(id) {
                 if (!Components.confirm('정말 삭제하시겠습니까?')) return;
                 const data = DataStore.getData();
@@ -2361,18 +2361,18 @@
                 DataStore.saveData(data);
                 this.navigate('handover');
             },
- 
+
             printHandovers() {
                 const selected = Array.from(document.querySelectorAll('.handover-check:checked')).map(cb => cb.value);
                 if (selected.length === 0) {
                     Components.alert('인쇄할 항목을 선택해주세요.');
                     return;
                 }
- 
+
                 const data = DataStore.getData();
                 const handovers = data.handovers.filter(h => selected.includes(h.id));
                 const fromName = handovers.length > 0 ? handovers[0].from : Auth.currentUser.name;
- 
+
                 const html = `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -2447,7 +2447,7 @@
   </table>
 </body>
 </html>`;
- 
+
                 const w = window.open('', '_blank', 'width=800,height=600');
                 if (!w) { Components.alert('팝업이 차단되었습니다. 팝업을 허용해 주세요.'); return; }
                 w.document.open();
@@ -2456,7 +2456,7 @@
                 w.focus();
                 setTimeout(() => w.print(), 500);
             },
- 
+
             bindIssueEvents() {
                 document.getElementById('issueForm').addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -2471,13 +2471,13 @@
                         createdBy: Auth.currentUser.name,
                         createdAt: new Date().toISOString()
                     };
- 
+
                     data.issues.push(issue);
                     DataStore.saveData(data);
                     this.navigate('issues');
                 });
             },
- 
+
             closeIssue(id) {
                 const data = DataStore.getData();
                 const issue = data.issues.find(i => i.id === id);
@@ -2487,7 +2487,7 @@
                     this.navigate('issues');
                 }
             },
- 
+
             reopenIssue(id) {
                 const data = DataStore.getData();
                 const issue = data.issues.find(i => i.id === id);
@@ -2497,7 +2497,7 @@
                     this.navigate('issues');
                 }
             },
- 
+
             deleteIssue(id) {
                 if (!Components.confirm('정말 삭제하시겠습니까?')) return;
                 const data = DataStore.getData();
@@ -2505,20 +2505,20 @@
                 DataStore.saveData(data);
                 this.navigate('issues');
             },
- 
+
             renderAnalysisCharts() {
                 const data = DataStore.getData();
                 const members = DataStore.getMembers().filter(m => m.status === 'approved' && m.role !== 'admin');
                 const month = document.getElementById('analysisMonth')?.value || Utils.today().substring(0, 7);
- 
+
                 const monthTasks = data.tasks.filter(t => 
                     t.date.startsWith(month) && t.status === 'done'
                 );
- 
+
                 const hoursData = [];
                 const countData = [];
                 const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
- 
+
                 members.forEach(m => {
                     const myTasks = monthTasks.filter(t => 
                         t.assignee === m.name || (!t.assignee && t.createdBy === m.name)
@@ -2527,19 +2527,19 @@
                     hoursData.push({ label: m.name, value: hours });
                     countData.push({ label: m.name, value: myTasks.length });
                 });
- 
+
                 setTimeout(() => {
                     Charts.drawDonut('hoursChart', 'hoursLegend', hoursData, colors);
                     Charts.drawDonut('countChart', 'countLegend', countData, colors);
                 }, 0);
             },
- 
+
             bindAnalysisEvents() {
                 document.getElementById('analysisMonth')?.addEventListener('change', () => {
                     this.navigate('analysis');
                 });
             },
- 
+
             approveMember(id) {
                 const members = DataStore.getMembers();
                 const member = members.find(m => m.id === id);
@@ -2549,7 +2549,7 @@
                     this.navigate('members');
                 }
             },
- 
+
             rejectMember(id) {
                 const members = DataStore.getMembers();
                 const member = members.find(m => m.id === id);
@@ -2559,7 +2559,7 @@
                     this.navigate('members');
                 }
             },
- 
+
             deleteMember(id) {
                 if (!Components.confirm('정말 삭제하시겠습니까?')) return;
                 let members = DataStore.getMembers();
@@ -2567,7 +2567,7 @@
                 DataStore.saveMembers(members);
                 this.navigate('members');
             },
- 
+
             // 소요시간 수정
             updateDuration(id, value) {
                 const data = DataStore.getData();
@@ -2579,7 +2579,7 @@
                 task.duration = parseFloat(value);
                 DataStore.saveData(data);
             },
- 
+
             // 권한 변경 (관리자 → 직원 / 직원 → 관리자)
             changeRole(id, newRole) {
                 if (!Auth.isAdmin()) return;
@@ -2601,18 +2601,18 @@
                 }
                 this.navigate('members');
             },
- 
+
             // 달력 휴가자 이름 클릭 → 인수인계 모달
             showHandoverModal(name, date) {
                 const data = DataStore.getData();
                 const allByPerson = data.handovers.filter(h => h.from === name).sort((a,b) => b.date.localeCompare(a.date));
                 const isSelf = Auth.currentUser.name === name || Auth.isAdmin();
- 
+
                 let content = `<p style="margin-bottom:.75rem;color:var(--gray-600);font-size:.9rem">
                     <strong>${Utils.escapeHtml(name)}</strong> · 인수인계 내역
                     ${isSelf ? '' : '<span style="background:#fff3e0;color:#e65100;font-size:.75rem;padding:2px 8px;border-radius:999px;margin-left:6px">👁 조회만 가능</span>'}
                 </p>`;
- 
+
                 if (allByPerson.length === 0) {
                     content += `<p style="color:#999;text-align:center;padding:1rem">등록된 인수인계가 없습니다.</p>`;
                     if (isSelf) {
@@ -2635,7 +2635,7 @@
                 }
                 Components.showModal(`📋 ${Utils.escapeHtml(name)} 인수인계`, content);
             },
- 
+
             // 휴가 날짜 클릭 → 인수인계 페이지로 이동 + 날짜 자동 입력
             goToHandoverWithDate(date) {
                 this.navigate('handover');
@@ -2645,10 +2645,10 @@
                 }, 50);
             }
         };
- 
+
         // 앱 시작
         document.addEventListener('DOMContentLoaded', () => App.init());
- 
+
         // ==================== PWA ====================
         // 서비스 워커 등록
         if ('serviceWorker' in navigator) {
@@ -2658,23 +2658,23 @@
                     .catch(err => console.warn('SW 등록 실패:', err));
             });
         }
- 
+
         // 앱 설치 프롬프트
         let _pwaPrompt = null;
- 
+
         function _showInstallBtns(show) {
             const box = document.getElementById('pwaInstallBox');
             const hBtn = document.getElementById('headerInstallBtn');
             if (box) box.style.display = show ? 'block' : 'none';
             if (hBtn) hBtn.style.display = show ? 'inline-block' : 'none';
         }
- 
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             _pwaPrompt = e;
             _showInstallBtns(true);
         });
- 
+
         // 로그인 화면 설치 버튼
         document.getElementById('pwaInstallBtn')?.addEventListener('click', async () => {
             if (!_pwaPrompt) return;
@@ -2685,7 +2685,7 @@
                 _pwaPrompt = null;
             }
         });
- 
+
         // App에 헤더 버튼용 함수 추가
         App.promptInstall = async function() {
             if (!_pwaPrompt) return;
@@ -2696,7 +2696,7 @@
                 _pwaPrompt = null;
             }
         };
- 
+
         // 설치 완료 시 버튼 숨기기
         window.addEventListener('appinstalled', () => {
             _showInstallBtns(false);
