@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>근무현황 대시보드</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3498db">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="근무현황">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         :root {
             --primary: #3498db;
@@ -609,6 +618,18 @@
     <div id="authScreen" class="login-container">
         <div class="login-box">
             <h1 class="login-title">📊 근무현황 대시보드</h1>
+
+            <!-- PWA 설치 버튼 -->
+            <div id="pwaInstallBox" style="display:none;margin-bottom:1.2rem;">
+                <div style="background:linear-gradient(135deg,#3498db,#2980b9);border-radius:var(--radius);padding:1rem;text-align:center;color:#fff;">
+                    <div style="font-size:1.8rem;margin-bottom:.4rem">📲</div>
+                    <div style="font-weight:600;font-size:.95rem;margin-bottom:.25rem">앱으로 설치하기</div>
+                    <div style="font-size:.78rem;opacity:.85;margin-bottom:.75rem">홈 화면에 추가하면 앱처럼 빠르게 사용할 수 있습니다</div>
+                    <button id="pwaInstallBtn" style="background:#fff;color:#2980b9;border:none;border-radius:6px;padding:.45rem 1.4rem;font-size:.9rem;font-weight:600;cursor:pointer;width:100%">
+                        지금 설치
+                    </button>
+                </div>
+            </div>
             
             <div class="tab-buttons">
                 <button class="tab-btn active" data-tab="login">로그인</button>
@@ -670,6 +691,7 @@
                 <div class="header-user">
                     <span id="userInfo"></span>
                     <button id="syncBtn" onclick="DataStore.refresh()" style="display:none;background:none;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px;color:#555" title="Google Sheets에서 최신 데이터 불러오기">🔄 새로고침</button>
+                    <button id="headerInstallBtn" onclick="App.promptInstall()" style="display:none;background:var(--primary);color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:13px;font-weight:500" title="앱으로 설치">📲 앱 설치</button>
                     <button id="changePwBtn" class="btn btn-secondary btn-sm">비밀번호 변경</button>
                     <button id="logoutBtn" class="btn btn-danger btn-sm">로그아웃</button>
                 </div>
@@ -709,7 +731,19 @@
             formatDate(date) {
                 if (!date) return '';
                 const d = new Date(date);
+                if (isNaN(d.getTime())) return '';
                 return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            },
+
+            // 날짜를 YYYY-MM-DD(요일) 형식으로 표시
+            formatDateKr(dateStr) {
+                if (!dateStr) return '';
+                // ISO 날짜 문자열 정규화 (2026-04-05T15:00:00.000Z → 2026-04-05)
+                const clean = String(dateStr).substring(0, 10);
+                const d = new Date(clean + 'T00:00:00');
+                if (isNaN(d.getTime())) return clean;
+                const days = ['일','월','화','수','목','금','토'];
+                return `${clean}(${days[d.getDay()]})`;
             },
 
             // 오늘 날짜
@@ -769,9 +803,14 @@
                 return name && name.trim().length >= 2;
             },
             parseDates(dates) {
-                if (Array.isArray(dates)) return dates;
+                const normalize = d => d ? String(d).substring(0, 10) : '';
+                if (Array.isArray(dates)) return dates.map(normalize).filter(Boolean);
                 if (typeof dates === 'string') {
-                    try { return JSON.parse(dates); } catch(e) { return dates.split(',').map(d => d.trim()); }
+                    try {
+                        const parsed = JSON.parse(dates);
+                        if (Array.isArray(parsed)) return parsed.map(normalize).filter(Boolean);
+                    } catch(e) {}
+                    return dates.split(',').map(d => normalize(d.trim())).filter(Boolean);
                 }
                 return [];
             },
@@ -832,13 +871,11 @@
                     _cache.handovers = Array.isArray(all.handovers)  ? all.handovers : [];
                     _cache.issues    = Array.isArray(all.issues)     ? all.issues    : [];
 
-                    // 관리자 없으면 생성, 있어도 role/status/password 항상 보정
                     const adminIdx = _cache.members.findIndex(m => m.name === '관리자' || m.id === 'admin_default');
                     if (adminIdx === -1) {
                         await sheetsPost({ action:'save', sheet:'members', data: this.defaultAdmin });
                         _cache.members.push(this.defaultAdmin);
                     } else {
-                        // Sheets에서 온 관리자 데이터가 role/status/password 이상할 경우 보정
                         const a = _cache.members[adminIdx];
                         if (a.role !== 'admin' || a.status !== 'approved') {
                             a.role = 'admin'; a.status = 'approved';
@@ -846,8 +883,9 @@
                         }
                         if (!a.password) a.password = this.defaultAdmin.password;
                     }
+                    DataStore._sheetsOK = true;
                 } catch(e) {
-                    console.error('Sheets 연결 실패, 로컬 캐시 사용:', e);
+                    console.error('Sheets 연결 실패:', e);
                     _cache.members   = JSON.parse(localStorage.getItem('_members') || '[]');
                     _cache.tasks     = JSON.parse(localStorage.getItem('_tasks')   || '[]');
                     _cache.vacations = JSON.parse(localStorage.getItem('_vacs')    || '[]');
@@ -863,6 +901,7 @@
                         }
                         if (!a.password) a.password = this.defaultAdmin.password;
                     }
+                    DataStore._sheetsOK = false;
                 }
                 this.showLoading(false);
             },
@@ -873,11 +912,19 @@
                     if (!el) {
                         el = document.createElement('div');
                         el.id = '_loadingOverlay';
-                        el.innerHTML = '<div style="text-align:center"><div style="font-size:32px;margin-bottom:12px">📊</div><div style="font-size:15px;color:#555">Google Sheets에서 데이터를 불러오는 중...</div></div>';
-                        el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;z-index:9999;';
+                        el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;';
+                        el.innerHTML = `
+                            <div style="font-size:40px">📊</div>
+                            <div style="font-size:15px;color:#444;font-weight:500">Google Sheets 연결 중...</div>
+                            <div style="width:200px;height:4px;background:#e0e0e0;border-radius:2px;overflow:hidden">
+                                <div id="_loadBar" style="width:30%;height:100%;background:#3498db;border-radius:2px;animation:_lb 1.4s ease-in-out infinite"></div>
+                            </div>
+                            <style>@keyframes _lb{0%{transform:translateX(-100%);width:30%}50%{width:60%}100%{transform:translateX(400%);width:30%}}</style>`;
                         document.body.appendChild(el);
                     }
-                } else { if (el) el.remove(); }
+                } else {
+                    if (el) el.remove();
+                }
             },
 
             getMembers() { return _cache.members || []; },
@@ -1248,14 +1295,14 @@
                         ? `<div class="carry-row carry-row-head" style="grid-template-columns:90px 80px 1fr 60px"><span>날짜</span><span>담당자</span><span>업무 내용</span><span>중요도</span></div>`
                         : `<div class="carry-row carry-row-head"><span>날짜</span><span>업무 내용</span><span>중요도</span></div>`;
                     const rows = tasks.sort((a,b)=>a.date.localeCompare(b.date)).map(t => showAssignee
-                        ? `<div class="carry-row" style="grid-template-columns:90px 80px 1fr 60px">
-                               <span class="carry-date">${t.date}</span>
+                        ? `<div class="carry-row" style="grid-template-columns:110px 80px 1fr 60px">
+                               <span class="carry-date">${Utils.formatDateKr(t.date)}</span>
                                <span style="font-weight:600">${Utils.escapeHtml(t.assignee||t.createdBy)}</span>
                                <span>${Utils.escapeHtml(t.content)}</span>
                                <span>${Components.priorityBadge(t.priority)}</span>
                            </div>`
-                        : `<div class="carry-row">
-                               <span class="carry-date">${t.date}</span>
+                        : `<div class="carry-row" style="grid-template-columns:110px 1fr 60px">
+                               <span class="carry-date">${Utils.formatDateKr(t.date)}</span>
                                <span>${Utils.escapeHtml(t.content)}</span>
                                <span>${Components.priorityBadge(t.priority)}</span>
                            </div>`
@@ -1351,7 +1398,7 @@
                                 <div class="issue-item ${issue.urgent?'urgent':''}">
                                     <strong>${issue.urgent?'🚨 ':''}${Utils.escapeHtml(issue.title)}</strong>
                                     <p style="margin-top:.25rem;font-size:.9rem">${Utils.escapeHtml(issue.content)}</p>
-                                    <small style="color:#999">${issue.createdAt.substring(0,10)}</small>
+                                    <small style="color:#999">${Utils.formatDateKr(issue.createdAt)}</small>
                                 </div>`).join('')}
                         </div>
 
@@ -1460,7 +1507,7 @@
                                             .map(h=>`<option value="${h}" ${Number(t.duration)===h?'selected':''}>${h}시간</option>`).join('');
                                         return `
                                         <tr data-id="${t.id}" data-date="${t.date}" data-status="${t.status}">
-                                            <td>${t.date}</td>
+                                            <td>${Utils.formatDateKr(t.date)}</td>
                                             <td>${Utils.escapeHtml(t.assignee || t.createdBy)}</td>
                                             <td>${Utils.escapeHtml(t.content)}</td>
                                             <td>${Components.priorityBadge(t.priority)}</td>
@@ -1519,7 +1566,7 @@
                                         return `<tr>
                                             <td>${Utils.escapeHtml(v.name)}</td>
                                             <td>${Utils.escapeHtml(v.type)}</td>
-                                            <td>${datesArr.map(d => `<span class="vac-date-link" onclick="App.goToHandoverWithDate('${d}')" title="인수인계 작성">${d}</span>`).join(' ')}</td>
+                                            <td>${datesArr.map(d => `<span class="vac-date-link" onclick="App.goToHandoverWithDate('${d}')" title="인수인계 작성">${Utils.formatDateKr(d)}</span>`).join(' ')}</td>
                                             <td>${Utils.escapeHtml(v.memo||'-')}</td>
                                             <td>${isOwner ? `<button class="btn btn-danger btn-sm" onclick="App.deleteVacation('${v.id}')">삭제</button>` : '-'}</td>
                                         </tr>`;
@@ -1583,7 +1630,7 @@
                                     ${data.handovers.sort((a, b) => b.date.localeCompare(a.date)).map(h => `
                                         <tr>
                                             <td><input type="checkbox" class="handover-check" value="${h.id}"></td>
-                                            <td>${h.date}</td>
+                                            <td>${Utils.formatDateKr(h.date)}</td>
                                             <td>${Utils.escapeHtml(h.from)}</td>
                                             <td>${Utils.escapeHtml(h.to)}</td>
                                             <td>${Utils.escapeHtml(h.content.substring(0, 50))}${h.content.length > 50 ? '...' : ''}</td>
@@ -1646,7 +1693,7 @@
                                 <tbody>
                                     ${data.issues.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(i => `
                                         <tr>
-                                            <td>${i.createdAt.substring(0, 10)}</td>
+                                            <td>${Utils.formatDateKr(i.createdAt)}</td>
                                             <td>${Utils.escapeHtml(i.title)}</td>
                                             <td>${Utils.escapeHtml(i.content.substring(0, 30))}...</td>
                                             <td>${i.urgent ? '🚨 긴급' : '일반'}</td>
@@ -1789,7 +1836,7 @@
                                                 }
                                             </td>
                                             <td>${Components.approvalBadge(m.status)}</td>
-                                            <td>${m.createdAt ? m.createdAt.substring(0,10) : '-'}</td>
+                                            <td>${m.createdAt ? Utils.formatDateKr(m.createdAt) : '-'}</td>
                                             <td>
                                                 <div class="btn-group">
                                                     ${m.status==='pending'?`
@@ -1900,6 +1947,17 @@
                 document.getElementById('authScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 document.getElementById('syncBtn').style.display = 'inline-block';
+
+                // Sheets 연결 상태 배너
+                const existBanner = document.getElementById('_sheetsBanner');
+                if (existBanner) existBanner.remove();
+                if (DataStore._sheetsOK === false) {
+                    const banner = document.createElement('div');
+                    banner.id = '_sheetsBanner';
+                    banner.style.cssText = 'background:#fff3e0;color:#e65100;padding:8px 16px;font-size:13px;text-align:center;border-bottom:1px solid #ffcc80;';
+                    banner.innerHTML = '⚠️ Google Sheets 연결 실패 — 로컬 데이터로 동작 중입니다. Apps Script 재배포 후 🔄 새로고침을 눌러주세요.';
+                    document.getElementById('appScreen').prepend(banner);
+                }
                 
                 // 관리자 메뉴 표시
                 document.querySelectorAll('.admin-only').forEach(el => {
@@ -2318,7 +2376,7 @@
     <tbody>
       ${handovers.map(h => `
       <tr>
-        <td class="col-date">${h.date ? h.date.substring(0,10) : ''}</td>
+        <td class="col-date">${h.date ? Utils.formatDateKr(h.date) : ''}</td>
         <td class="col-to">${Utils.escapeHtml(h.to)}</td>
         <td class="col-content">${Utils.escapeHtml(h.content)}</td>
         <td class="col-note"></td>
@@ -2502,7 +2560,7 @@
                     content += allByPerson.slice(0,10).map(h => `
                         <div class="handover-modal-item">
                             <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                                <strong>${h.date ? h.date.substring(0,10) : ''}</strong>
+                                <strong>${h.date ? Utils.formatDateKr(h.date) : ''}</strong>
                                 <span style="color:var(--gray-600);font-size:.8rem">→ ${Utils.escapeHtml(h.to)}</span>
                             </div>
                             <div style="white-space:pre-wrap">${Utils.escapeHtml(h.content)}</div>
@@ -2528,6 +2586,61 @@
 
         // 앱 시작
         document.addEventListener('DOMContentLoaded', () => App.init());
+
+        // ==================== PWA ====================
+        // 서비스 워커 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/tjeorb/sw.js')
+                    .then(() => console.log('SW 등록 완료'))
+                    .catch(err => console.warn('SW 등록 실패:', err));
+            });
+        }
+
+        // 앱 설치 프롬프트
+        let _pwaPrompt = null;
+
+        function _showInstallBtns(show) {
+            const box = document.getElementById('pwaInstallBox');
+            const hBtn = document.getElementById('headerInstallBtn');
+            if (box) box.style.display = show ? 'block' : 'none';
+            if (hBtn) hBtn.style.display = show ? 'inline-block' : 'none';
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            _pwaPrompt = e;
+            _showInstallBtns(true);
+        });
+
+        // 로그인 화면 설치 버튼
+        document.getElementById('pwaInstallBtn')?.addEventListener('click', async () => {
+            if (!_pwaPrompt) return;
+            _pwaPrompt.prompt();
+            const { outcome } = await _pwaPrompt.userChoice;
+            if (outcome === 'accepted') {
+                _showInstallBtns(false);
+                _pwaPrompt = null;
+            }
+        });
+
+        // App에 헤더 버튼용 함수 추가
+        App.promptInstall = async function() {
+            if (!_pwaPrompt) return;
+            _pwaPrompt.prompt();
+            const { outcome } = await _pwaPrompt.userChoice;
+            if (outcome === 'accepted') {
+                _showInstallBtns(false);
+                _pwaPrompt = null;
+            }
+        };
+
+        // 설치 완료 시 버튼 숨기기
+        window.addEventListener('appinstalled', () => {
+            _showInstallBtns(false);
+            _pwaPrompt = null;
+            console.log('앱 설치 완료');
+        });
     </script>
 </body>
 </html>
